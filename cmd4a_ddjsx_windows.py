@@ -138,11 +138,13 @@ def main():
                     # Normalzustand: Der Controller sendet nicht permanent.
                     continue
                 status, d1, d2 = raw & 255, (raw >> 8) & 127, (raw >> 16) & 127
+                if args.monitor:
+                    print(f"IN  {status:02X} {d1:02X} {d2:02X}", flush=True)
                 result = translate(status, d1, d2)
                 if result is None: continue
                 packets = result if isinstance(result, tuple) else (result,)
                 for packet in packets: winmm.midiOutShortMsg(out_handle, packet)
-                if args.monitor: print(f"{status:02X} {d1:02X} {d2:02X} -> {packets}", flush=True)
+                if args.monitor: print(f"OUT {packets}", flush=True)
         except KeyboardInterrupt:
             pass
         finally:
