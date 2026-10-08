@@ -68,9 +68,10 @@ def translate(status, d1, d2):
     typ, ch = status & 0xF0, status & 0x0F
     # Hard priority: the documented CMD jog messages are handled before any
     # button map. They must never be interpreted as Cue or another button.
-    if typ == 0xB0 and ch in (0, 1) and d1 in (0x1A, 0x3A):
-        return pack(0xB0 | ch, 0x22, max(34, min(89, d2)))
-    if typ in (0x80, 0x90) and ch in (0, 1) and d1 in (0x1A, 0x3A):
+    if (status, d1) in ((0xB0, 0x1A), (0xB1, 0x3A)):
+        return pack(status, 0x22, d2)
+    if (status, d1) in ((0x90, 0x1A), (0x91, 0x3A),
+                        (0x80, 0x1A), (0x81, 0x3A)):
         return pack(typ | ch, 0x36, d2)
     # CMD 7-bit mixer controls -> official DDJ-SX 14-bit CC pairs.
     analog = {
