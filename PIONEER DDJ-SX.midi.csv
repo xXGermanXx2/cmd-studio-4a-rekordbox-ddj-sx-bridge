@@ -33,8 +33,6 @@ WheelSearch,WheelSearch,JogRotate,B026,0,1,2,3,,,,,,RO,Pitch Bend
 ,,,,,,,,,,,,,,
 TempoSlider,TempoSlider,KnobSliderHiRes,B000,0,1,2,3,,,,,,Fast,Tempo Control
 TempoSlider,TempoSlider+Shift,KnobSliderHiRes,B005,0,1,2,3,,,,,,Fast,Tempo Control
-MasterTempo,KeyLock,Button,901A,0,1,2,3,,,,,,,MasterTempo On/Off
-TempoRange,KeyLock+Shift,Button,9060,0,1,2,3,,,,,,,Tempo Range
 #,KeyLock+LongPress,Button,901C,0,1,2,3,901C,0,1,2,3,,No function assigned here
 NeedleSearch,NeedleSearch,Value,B003,0,1,2,3,,,,,,Max=16383,Needle Search slide(00-7f)
 #,NeedleSearch+Touch,Button,9043,0,1,2,3,,,,,,,Needle Search touch(00/7f)

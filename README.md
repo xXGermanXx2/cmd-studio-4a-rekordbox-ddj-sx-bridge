@@ -136,6 +136,10 @@ Hot-Cue-Modus wieder her.
 Beim FX4-Filter bedeutet Aus den neutralen Mittelpunkt. Beim erneuten
 Einschalten wird die zuletzt eingestellte Filterposition wiederhergestellt.
 
+Key Lock/Master Tempo und Tempo Range sind aus dem Controller-Mapping entfernt.
+Damit kann das Pult die Tonart nicht mehr umschalten. Für tonartneutrale
+Tempoänderungen muss **Key Lock in rekordbox selbst aktiviert** sein.
+
 Die DDJ-SX-Zielcodes für Jogwheel, Touch, EQ und Fader stammen aus der DDJ-SX-MIDI-Definition. Die CMD-Eingangscodes stammen aus der dokumentierten CMD-Studio-4A-Controllerdefinition.
 
 ## Diagnose

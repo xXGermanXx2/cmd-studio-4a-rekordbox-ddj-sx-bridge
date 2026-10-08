@@ -131,15 +131,15 @@ def translate(status, d1, d2, filter_state=None, pad_mode=None):
         return (pack(0xB0 | ch, 0x00, msb),
                 pack(0xB0 | ch, 0x20, lsb))
     # CMD DEL buttons switch the deck's mapping mode. 901B is Hot Cue mode
-    # and 9069 is Beat Jump mode. Turn the old mode off first; otherwise both
-    # modes stay enabled and Beat Jump can keep taking priority.
+    # and 9069 is Beat Jump mode. These Button mappings are toggles, so both
+    # mode changes must be sent as note-on impulses with value 7F.
     if typ in (0x80, 0x90) and d2 and (ch, d1) in ((0, 0x2A), (1, 0x4A)):
         pad_mode[ch] = "beatjump" if pad_mode[ch] == "hotcue" else "hotcue"
         mode_status = 0x90 | ch
         if pad_mode[ch] == "beatjump":
-            return (pack(mode_status, 0x1B, 0x00),
+            return (pack(mode_status, 0x1B, 0x7F),
                     pack(mode_status, 0x69, d2))
-        return (pack(mode_status, 0x69, 0x00),
+        return (pack(mode_status, 0x69, 0x7F),
                 pack(mode_status, 0x1B, d2))
     # Equal-function buttons: CMD note -> DDJ-SX note on channel 16.
     button = {
