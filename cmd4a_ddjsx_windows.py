@@ -12,7 +12,7 @@ import queue
 import sys
 import time
 
-RELEASE = "2026.10.08-original-ddjsx-map"
+RELEASE = "2026.10.08-factual-no-jog-cue"
 
 winmm = ctypes.WinDLL("winmm.dll")
 MIDI_CALLBACK = ctypes.WINFUNCTYPE(None, wintypes.HANDLE, wintypes.UINT,
@@ -66,6 +66,12 @@ def pack(status, d1=0, d2=0):
 
 def translate(status, d1, d2):
     typ, ch = status & 0xF0, status & 0x0F
+    # Hard priority: the documented CMD jog messages are handled before any
+    # button map. They must never be interpreted as Cue or another button.
+    if typ == 0xB0 and ch in (0, 1) and d1 in (0x1A, 0x3A):
+        return pack(0xB0 | ch, 0x22, max(34, min(89, d2)))
+    if typ in (0x80, 0x90) and ch in (0, 1) and d1 in (0x1A, 0x3A):
+        return pack(typ | ch, 0x36, d2)
     # CMD 7-bit mixer controls -> official DDJ-SX 14-bit CC pairs.
     analog = {
         (0, 0x10):(0,0x04,0x24), (1,0x30):(1,0x04,0x24),
@@ -88,11 +94,6 @@ def translate(status, d1, d2):
         return pack(0xB0 | target_ch, msb, d2)
     # Official DDJ-SX list: platter jog is CC 0x22; limit to its documented
     # relative range (34..63 CCW, 65..89 CW).
-    if typ == 0xB0 and ch in (0, 1) and d1 in (0x1A, 0x3A):
-        return pack(0xB0 | ch, 0x22, max(34, min(89, d2)))
-    # Jog touch: CMD notes 0x1A/0x3A -> official DDJ-SX note 0x36.
-    if typ in (0x80, 0x90) and ch in (0, 1) and d1 in (0x1A, 0x3A):
-        return pack(typ | ch, 0x36, d2)
     # Pitch bend: CMD 14-bit pitch -> DDJ-SX 14-bit CC 0x00 + 0x20.
     if typ == 0xE0 and ch in (0, 1):
         value = d1 | (d2 << 7)
