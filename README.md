@@ -130,8 +130,9 @@ werden so übersetzt:
 | FX4-Regler und FX4-Taste | High-/Low-Pass-Filter und Filter An/Aus |
 
 Die DEL-Taste arbeitet deckweise: `90 2A` schaltet die linken acht Pads um,
-`91 4A` die rechten acht Pads. Ein weiterer Druck stellt den jeweiligen
-Hot-Cue-Modus wieder her.
+`91 4A` die rechten acht Pads. Die Bridge sendet dabei direkt die jeweiligen
+Hot-Cue- oder Beat-Jump-Padcodes. Die globalen rekordbox-Moduszeilen wurden
+entfernt, damit die rekordbox-Anzeige nicht zwischen beiden Modi flackert.
 
 Beim FX4-Filter bedeutet Aus den neutralen Mittelpunkt. Beim erneuten
 Einschalten wird die zuletzt eingestellte Filterposition wiederhergestellt.

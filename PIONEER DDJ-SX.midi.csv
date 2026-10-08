@@ -307,8 +307,6 @@ PAD8_VelocitySampler,PAD8.VelocitySampler.Start,Pad,9077,7,8,9,10,,,,,,Fast,Samp
 PAD8_VelocitySampler+Velocity,PAD8.VelocitySampler.Level,Value,B037,7,8,9,10,,,,,,Fast,Sample Slot 8 Level (use Pad velocity)
 PAD8_VelocitySampler+Shift,PAD8.VelocitySampler.Stop,Pad,907F,7,8,9,10,,,,,,Fast,Sample Slot 8 stop
 ,,,,,,,,,,,,,,
-HotCue,HotCueMode,Button,901B,0,1,2,3,,,,,,Fast,HOT CUE Mode On/Off
-BeatJump,HotCue+Shift,Button,9069,0,1,2,3,,,,,,Fast,BEAT JUMP Mode On/Off
 PadFx1,PadFx1Mode,Button,901E,0,1,2,3,,,,,,Fast,PAD FX1 Mode On/Off
 PadFx2,PadFx1+Shift,Button,906B,0,1,2,3,,,,,,Fast,PAD FX2 Mode On/Off
 Slicer,SlicerMode,Button,9020,0,1,2,3,,,,,,Fast,SLICER Mode On/Off
