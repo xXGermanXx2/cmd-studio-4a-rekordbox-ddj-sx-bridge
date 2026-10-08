@@ -1,0 +1,19 @@
+source,source_midi,output,output_midi,confidence,source_basis
+CMD Jog A,CC ch1 0x1A,DDJ-SX JogScratch,CC ch1 0x0A,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Jog B,CC ch2 0x3A,DDJ-SX JogScratch,CC ch2 0x0A,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Touch A,Note ch1 0x1A,DDJ-SX JogTouch,Note ch1 0x08,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Touch B,Note ch2 0x3A,DDJ-SX JogTouch,Note ch2 0x08,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Pitch A,Pitch Bend ch1,DDJ-SX TempoSlider,CC ch1 0x00+0x20,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Pitch B,Pitch Bend ch2,DDJ-SX TempoSlider,CC ch2 0x00+0x20,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Play A,Note ch1 0x2C,DDJ-SX PlayPause,Note ch16 0x22,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD Play B,Note ch2 0x4C,DDJ-SX PlayPause,Note ch16 0x42,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD Cue A,Note ch1 0x2B,DDJ-SX Cue,Note ch16 0x14,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD Cue B,Note ch2 0x4B,DDJ-SX Cue,Note ch16 0x34,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD Sync A,Note ch1 0x2D,DDJ-SX Sync,Note ch16 0x25,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD Sync B,Note ch2 0x4D,DDJ-SX Sync,Note ch16 0x45,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD HotCue 1-8 A,Note ch1 0x22-0x29,DDJ-SX PAD1-8_HotCue,Note ch16 0x1D,0x0F,0x11,0x1B,0x24,0x15,0x12,0x20,fact-derived,equal hotcue function and deck position in controller maps
+CMD HotCue 1-8 B,Note ch2 0x42-0x49,DDJ-SX PAD1-8_HotCue,Note ch16 0x3D,0x2F,0x31,0x3B,0x44,0x35,0x32,0x40,fact-derived,equal hotcue function and deck position in controller maps
+CMD Loop In A,Note ch1 0x17,DDJ-SX LoopIn,Note ch16 0x0E,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD Loop In B,Note ch2 0x38,DDJ-SX LoopIn,Note ch16 0x2E,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD Loop Out A,Note ch1 0x18,DDJ-SX LoopOut,Note ch16 0x10,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD Loop Out B,Note ch2 0x37,DDJ-SX LoopOut,Note ch16 0x30,fact-derived,equal function name in CMD XML and DDJ-SX controller map
