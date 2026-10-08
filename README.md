@@ -137,3 +137,16 @@ Die DDJ-SX-Bridge übersetzt jetzt zusätzlich faktisch abgeleitet:
 Diese Zuordnungen verbinden nur gleichnamige Funktionen aus der CMD-Definition und der DDJ-SX-Controller-Map. Die einzelnen Eingangs- und Ausgangsbytes stehen in `CMD4A_to_DDJ-SX_facts.csv`.
 
 FX-Assign-Tasten und FX-Regler bleiben absichtlich unübersetzt: Die DDJ-SX-Map enthält dort keine eindeutige gleichnamige rekordbox-Funktion, die eine belastbare 1:1-Zuordnung erlauben würde. Eine FX-Zuordnung wäre daher eine kreative Belegung und keine Fakt-Daten-Übersetzung.
+
+## Windows-Version ohne C++ und ohne pip-Pakete
+
+Wenn keine C++-Build-Tools installiert werden sollen, benutze `cmd4a_ddjsx_windows.py`. Diese Version verwendet ausschließlich Python-Standardbibliothek und die bereits in Windows enthaltene `winmm.dll`.
+
+Es ist **kein** `pip install`, kein `mido`, kein `python-rtmidi` und kein C++-Compiler erforderlich. Voraussetzung bleibt nur Python 3 und ein virtueller MIDI-Treiber wie loopMIDI.
+
+```bat
+py cmd4a_ddjsx_windows.py --list
+py cmd4a_ddjsx_windows.py --input "CMD Studio 4A" --output "PIONEER DDJ-SX" --monitor
+```
+
+Oder `start_windows_pure.bat` starten. Die bisherige `rekordjog_cmd4a_ddjsx.py` bleibt als plattformübergreifende Variante mit `mido` erhalten; für Windows ohne native Python-Pakete ist die neue `cmd4a_ddjsx_windows.py` die richtige Datei.
