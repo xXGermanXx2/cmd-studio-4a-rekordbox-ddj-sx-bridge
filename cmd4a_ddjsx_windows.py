@@ -136,8 +136,9 @@ def translate(status, d1, d2, filter_state=None, pad_mode=None):
         pad_mode[ch] = "beatjump" if pad_mode[ch] == "hotcue" else "hotcue"
         mode_note = 0x69 if pad_mode[ch] == "beatjump" else 0x1B
         if pad_mode[ch] == "hotcue":
-            return (pack(0x90 | ch, 0x69, 0x00),
-                    pack(0x90 | ch, mode_note, d2))
+            # Beat Jump off returns rekordbox to its normal Hot Cue display;
+            # do not immediately send a second mode command, which flickers.
+            return pack(0x90 | ch, 0x69, 0x00)
         return pack(0x90 | ch, mode_note, d2)
     # Equal-function buttons: CMD note -> DDJ-SX note on channel 16.
     button = {
