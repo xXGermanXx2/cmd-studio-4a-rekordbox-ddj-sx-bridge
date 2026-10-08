@@ -112,8 +112,7 @@ def translate(status, d1, d2):
     if typ == 0xE0 and ch in (0, 1):
         value = d1 | (d2 << 7)
         msb, lsb = value >> 7, value & 0x7F
-        return (pack(0x90 | ch, 0x1A, 0x7F),
-                pack(0xB0 | ch, 0x00, msb),
+        return (pack(0xB0 | ch, 0x00, msb),
                 pack(0xB0 | ch, 0x20, lsb))
     # Equal-function buttons: CMD note -> DDJ-SX note on channel 16.
     button = {
@@ -122,7 +121,7 @@ def translate(status, d1, d2):
         (0,0x2D):0x58, (1,0x4D):0x58,  # Sync
         (0,0x17):0x10, (1,0x38):0x10,  # Loop In
         (0,0x18):0x11, (1,0x37):0x11,  # Loop Out
-        (0,0x19):0x4D, (1,0x39):0x4D,  # Reloop/Exit (Loop On/Off)
+        (0,0x19):0x14, (1,0x39):0x14,  # Auto Loop On/Off
         (0,0x50):0x46, (1,0x51):0x47,  # Load Deck 1/2
     }
     hotcue = {}
@@ -179,7 +178,9 @@ def main():
         # Enable Key Lock before accepting any pitch-fader messages so the
         # first tempo move cannot briefly change the musical key.
         winmm.midiOutShortMsg(out_handle, pack(0x90, 0x1A, 0x7F))
+        winmm.midiOutShortMsg(out_handle, pack(0x90, 0x1A, 0x00))
         winmm.midiOutShortMsg(out_handle, pack(0x91, 0x1A, 0x7F))
+        winmm.midiOutShortMsg(out_handle, pack(0x91, 0x1A, 0x00))
         r = winmm.midiInOpen(ctypes.byref(in_handle), in_id, ctypes.cast(callback, ctypes.c_void_p), 0, CALLBACK_FUNCTION)
         if r != MMSYSERR_NOERROR: raise RuntimeError(f"midiInOpen Fehler {r}")
         winmm.midiInStart(in_handle)
