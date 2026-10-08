@@ -148,9 +148,9 @@ def translate(status, d1, d2, filter_state=None, pad_mode=None):
     }
     hotcue = {}
     for i, note in enumerate(range(0x22, 0x2A)):
-        hotcue[(0, note)] = (7, i)
+        hotcue[(0, note)] = (0, i)
     for i, note in enumerate(range(0x42, 0x4A)):
-        hotcue[(1, note)] = (8, i)
+        hotcue[(1, note)] = (1, i)
     if typ in (0x80, 0x90) and (ch, d1) in hotcue:
         target_ch, note = hotcue[(ch, d1)]
         if pad_mode[ch] == "beatjump":
