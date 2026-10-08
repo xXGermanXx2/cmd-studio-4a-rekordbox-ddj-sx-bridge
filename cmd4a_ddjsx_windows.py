@@ -114,19 +114,19 @@ def translate(status, d1, d2):
         hotcue[(1, note)] = (8, i)
     if typ in (0x80, 0x90) and (ch, d1) in hotcue:
         target_ch, note = hotcue[(ch, d1)]
-        return pack(0x90 | target_ch, note, d2)
+        return pack(typ | target_ch, note, d2)
     # FX assign 1/2: official DDJ-SX FX1/FX2 ON messages.
     fx_buttons = {(0,0x52):(4,0x47), (0,0x53):(4,0x48),
                   (1,0x54):(5,0x47), (1,0x55):(5,0x48)}
     if typ in (0x80, 0x90) and (ch, d1) in fx_buttons:
         target_ch, note = fx_buttons[(ch, d1)]
-        return pack(0x90 | target_ch, note, d2)
+        return pack(typ | target_ch, note, d2)
     if typ in (0x80, 0x90) and ch in (0, 1) and (ch, d1) in button:
         if (ch, d1) == (0, 0x50):
-            return pack(0x96, 0x46, d2)
+            return pack((0x90 if typ == 0x90 else 0x80) | 0x06, 0x46, d2)
         if (ch, d1) == (1, 0x51):
-            return pack(0x96, 0x47, d2)
-        return pack(0x90 | ch, button[(ch, d1)], d2)
+            return pack((0x90 if typ == 0x90 else 0x80) | 0x06, 0x47, d2)
+        return pack(typ | ch, button[(ch, d1)], d2)
     return None
 
 
