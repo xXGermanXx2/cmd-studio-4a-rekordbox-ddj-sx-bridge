@@ -98,13 +98,21 @@ def translate(status, d1, d2):
         target_ch, msb, lsb = fx_knobs[(ch, d1)]
         return (pack(0xB0 | target_ch, msb, d2),
                 pack(0xB0 | target_ch, lsb, 0))
+    # CMD browser controls -> official DDJ-SX browser messages.
+    if status == 0xB0 and ch == 0 and d1 == 0x01:
+        return pack(0xB6, 0x40, d2)       # Browse rotary
+    if typ in (0x80, 0x90) and ch == 0 and d1 in (0x01, 0x02, 0x03):
+        browser_notes = {0x01: 0x41, 0x02: 0x65, 0x03: 0x41}
+        return pack(0x96, browser_notes[d1], 0x7F if typ == 0x90 else 0x00)
     # Official DDJ-SX list: platter jog is CC 0x22; limit to its documented
     # relative range (34..63 CCW, 65..89 CW).
     # Pitch bend: CMD 14-bit pitch -> DDJ-SX 14-bit CC 0x00 + 0x20.
     if typ == 0xE0 and ch in (0, 1):
         value = d1 | (d2 << 7)
         msb, lsb = value >> 7, value & 0x7F
-        return (pack(0xB0 | ch, 0x00, msb), pack(0xB0 | ch, 0x20, lsb))
+        return (pack(0x90 | ch, 0x1A, 0x7F),
+                pack(0xB0 | ch, 0x00, msb),
+                pack(0xB0 | ch, 0x20, lsb))
     # Equal-function buttons: CMD note -> DDJ-SX note on channel 16.
     button = {
         (0,0x2C):0x0B, (1,0x4C):0x0B,  # Play/Pause
@@ -112,6 +120,7 @@ def translate(status, d1, d2):
         (0,0x2D):0x58, (1,0x4D):0x58,  # Sync
         (0,0x17):0x10, (1,0x38):0x10,  # Loop In
         (0,0x18):0x11, (1,0x37):0x11,  # Loop Out
+        (0,0x50):0x46, (1,0x51):0x47,  # Load Deck 1/2
     }
     hotcue = {}
     for i, note in enumerate(range(0x22, 0x2A)):
