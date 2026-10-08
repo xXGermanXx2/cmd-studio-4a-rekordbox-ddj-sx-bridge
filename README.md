@@ -1,4 +1,4 @@
-# CMD Studio 4A → rekordbox 7 / DDJ-SX
+# CMD Studio 4A rekordbox 7 DDJ-SX Bridge
 
 Windows-MIDI-Bridge für den Behringer CMD Studio 4A. Die Bridge übersetzt die dokumentierten MIDI-Daten des CMD Studio 4A in DDJ-SX-kompatible Nachrichten für rekordbox 7.
 
