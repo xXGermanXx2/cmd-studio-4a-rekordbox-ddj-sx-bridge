@@ -70,9 +70,12 @@ def translate(status, d1, d2):
     # button map. They must never be interpreted as Cue or another button.
     if (status, d1) in ((0xB0, 0x1A), (0xB1, 0x3A)):
         return pack(status, 0x22, d2)
-    if (status, d1) in ((0x90, 0x1A), (0x91, 0x3A),
-                        (0x80, 0x1A), (0x81, 0x3A)):
-        return pack(typ | ch, 0x36, d2)
+    if (status, d1) in ((0x90, 0x1A), (0x91, 0x3A)):
+        return pack(status, 0x36, d2)
+    # Official DDJ-SX JogTouch uses 9n 36 with value 00 for release;
+    # do not send 8n 36, which can leave rekordbox in scratch mode.
+    if (status, d1) in ((0x80, 0x1A), (0x81, 0x3A)):
+        return pack(0x90 | ch, 0x36, 0x00)
     # CMD 7-bit mixer controls -> official DDJ-SX 14-bit CC pairs.
     analog = {
         (0, 0x10):(0,0x04,0x24), (1,0x30):(1,0x04,0x24),
