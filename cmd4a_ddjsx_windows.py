@@ -82,12 +82,13 @@ def translate(status, d1, d2):
         (0, 0x60):(0,0x07,0x27), (1,0x63):(1,0x07,0x27),
         (0, 0x61):(0,0x0B,0x2B), (1,0x64):(1,0x0B,0x2B),
         (0, 0x62):(0,0x0F,0x2F), (1,0x65):(1,0x0F,0x2F),
-        (0, 0x70):(0,0x13,0x00), (1, 0x71):(1,0x13,0x00),
+        (0, 0x70):(0,0x13,0x33), (1, 0x71):(1,0x13,0x33),
         (0, 0x72):(6,0x1F,0x3F),
     }
     if typ == 0xB0 and (ch, d1) in analog:
         target_ch, msb, lsb = analog[(ch, d1)]
-        return pack(0xB0 | target_ch, msb, d2)
+        return (pack(0xB0 | target_ch, msb, d2),
+                pack(0xB0 | target_ch, lsb, 0))
     # CMD FX knobs 2/3 -> official DDJ-SX FX1/FX2 parameter MSB+LSB pairs.
     fx_knobs = {
         (0, 0x11):(4, 0x02, 0x22), (0, 0x12):(4, 0x04, 0x24),
@@ -95,7 +96,8 @@ def translate(status, d1, d2):
     }
     if typ == 0xB0 and (ch, d1) in fx_knobs:
         target_ch, msb, lsb = fx_knobs[(ch, d1)]
-        return pack(0xB0 | target_ch, msb, d2)
+        return (pack(0xB0 | target_ch, msb, d2),
+                pack(0xB0 | target_ch, lsb, 0))
     # Official DDJ-SX list: platter jog is CC 0x22; limit to its documented
     # relative range (34..63 CCW, 65..89 CW).
     # Pitch bend: CMD 14-bit pitch -> DDJ-SX 14-bit CC 0x00 + 0x20.
@@ -118,19 +120,19 @@ def translate(status, d1, d2):
         hotcue[(1, note)] = (8, i)
     if typ in (0x80, 0x90) and (ch, d1) in hotcue:
         target_ch, note = hotcue[(ch, d1)]
-        return pack(typ | target_ch, note, d2)
+        return pack(0x90 | target_ch, note, d2)
     # FX assign 1/2: official DDJ-SX FX1/FX2 ON messages.
     fx_buttons = {(0,0x52):(4,0x47), (0,0x53):(4,0x48),
                   (1,0x54):(5,0x47), (1,0x55):(5,0x48)}
     if typ in (0x80, 0x90) and (ch, d1) in fx_buttons:
         target_ch, note = fx_buttons[(ch, d1)]
-        return pack(typ | target_ch, note, d2)
+        return pack(0x90 | target_ch, note, d2)
     if typ in (0x80, 0x90) and ch in (0, 1) and (ch, d1) in button:
         if (ch, d1) == (0, 0x50):
-            return pack((0x90 if typ == 0x90 else 0x80) | 0x06, 0x46, d2)
+            return pack(0x96, 0x46, d2)
         if (ch, d1) == (1, 0x51):
-            return pack((0x90 if typ == 0x90 else 0x80) | 0x06, 0x47, d2)
-        return pack(typ | ch, button[(ch, d1)], d2)
+            return pack(0x96, 0x47, d2)
+        return pack(0x90 | ch, button[(ch, d1)], d2)
     return None
 
 
