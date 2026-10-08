@@ -31,7 +31,11 @@ BUTTON_MAP = {
     # Loop In / Out. CMD B has reversed physical order in its documented layout.
     (0, 0x17): 0x0E, (1, 0x38): 0x2E,
     (0, 0x18): 0x10, (1, 0x37): 0x30,
+    # Load: DDJ-SX controller map uses status 0x9E, notes 0x0A/0x2A.
+    (0, 0x50): 0x0A, (1, 0x51): 0x2A,
 }
+
+LOAD_OUTPUT_STATUS = 0x9E
 
 JOG_INPUT = {(0, 0x1A): 0, (1, 0x3A): 1}
 TOUCH_INPUT = {(0, 0x1A): 0, (1, 0x3A): 1}
@@ -74,8 +78,9 @@ def translate(msg, out, passthrough=False, monitor=False):
         send_pitch(out, msg)
         result = f"PITCH Deck {msg.channel+1}: -> DDJ-SX CC 0x00/0x20"
     elif msg.type in ('note_on', 'note_off') and key in BUTTON_MAP:
-        out.send(mido.Message(msg.type, channel=15, note=BUTTON_MAP[key], velocity=msg.velocity))
-        result = f"BUTTON {msg.type}: CMD ch{msg.channel+1} note {msg.note:#04x} -> DDJ-SX ch16 note {BUTTON_MAP[key]:#04x}"
+        status_channel = 14 if key in {(0, 0x50), (1, 0x51)} else 15
+        out.send(mido.Message(msg.type, channel=status_channel, note=BUTTON_MAP[key], velocity=msg.velocity))
+        result = f"BUTTON {msg.type}: CMD ch{msg.channel+1} note {msg.note:#04x} -> DDJ-SX ch{status_channel+1} note {BUTTON_MAP[key]:#04x}"
     elif passthrough:
         out.send(msg.copy())
         result = f"PASS: {msg}"

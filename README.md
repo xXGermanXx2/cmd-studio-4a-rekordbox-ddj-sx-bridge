@@ -150,3 +150,9 @@ py cmd4a_ddjsx_windows.py --input "CMD Studio 4A" --output "PIONEER DDJ-SX" --mo
 ```
 
 Oder `start_windows_pure.bat` starten. Die bisherige `rekordjog_cmd4a_ddjsx.py` bleibt als plattformübergreifende Variante mit `mido` erhalten; für Windows ohne native Python-Pakete ist die neue `cmd4a_ddjsx_windows.py` die richtige Datei.
+
+## Aktualisierte Mapping-Datei
+
+`PIONEER DDJ-SX.midi.csv` enthält jetzt zusätzlich die dokumentierten DDJ-SX-Funktionen für Play/Pause, Cue, Sync, Hot Cue 1–8, Loop In, Loop Out und Load. Die Python-Übersetzer geben dieselben DDJ-SX-Status-/Notenwerte aus.
+
+Die CSV-Zeilen sind die DDJ-SX-Zieldefinitionen. Die CMD-Eingangsbytes und die abgeleitete Verbindung stehen vollständig in `CMD4A_to_DDJ-SX_facts.csv`.
