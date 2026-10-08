@@ -1,4 +1,5 @@
 @file,1,PIONEER DDJ-SX,,,,,,,,,,,,
+#release,2026.10.08-windows-pure,,,,,,,,,,,,
 #name,function,type,input,deck1,deck2,deck3,deck4,output,deck1,deck2,deck3,deck4,option,comment
 ,,,,,,,,,,,,,,
 JogScratch,JogScratch,JogRotate,B00A,1,2,,,,,,,,,RO,Scratch

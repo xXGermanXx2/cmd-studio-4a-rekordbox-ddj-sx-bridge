@@ -12,6 +12,8 @@ import queue
 import sys
 import time
 
+RELEASE = "2026.10.08-windows-pure"
+
 winmm = ctypes.WinDLL("winmm.dll")
 MIDI_CALLBACK = ctypes.WINFUNCTYPE(None, wintypes.HANDLE, wintypes.UINT,
                                    wintypes.DWORD, wintypes.DWORD, wintypes.DWORD)
