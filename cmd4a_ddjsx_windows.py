@@ -93,6 +93,8 @@ def translate(status, d1, d2):
     fx_knobs = {
         (0, 0x11):(4, 0x02, 0x22), (0, 0x12):(4, 0x04, 0x24),
         (1, 0x31):(5, 0x02, 0x22), (1, 0x32):(5, 0x04, 0x24),
+        # FX4 -> DDJ-SX Color FX/filter parameter, left/right channel.
+        (0, 0x13):(6, 0x17, 0x37), (1, 0x33):(6, 0x18, 0x38),
     }
     if typ == 0xB0 and (ch, d1) in fx_knobs:
         target_ch, msb, lsb = fx_knobs[(ch, d1)]
@@ -120,6 +122,7 @@ def translate(status, d1, d2):
         (0,0x2D):0x58, (1,0x4D):0x58,  # Sync
         (0,0x17):0x10, (1,0x38):0x10,  # Loop In
         (0,0x18):0x11, (1,0x37):0x11,  # Loop Out
+        (0,0x19):0x4D, (1,0x39):0x4D,  # Reloop/Exit (Loop On/Off)
         (0,0x50):0x46, (1,0x51):0x47,  # Load Deck 1/2
     }
     hotcue = {}
@@ -131,11 +134,18 @@ def translate(status, d1, d2):
         target_ch, note = hotcue[(ch, d1)]
         return pack(0x90 | target_ch, note, d2)
     # FX assign 1/2: official DDJ-SX FX1/FX2 ON messages.
-    fx_buttons = {(0,0x52):(4,0x47), (0,0x53):(4,0x48),
+    fx_buttons = {(0,0x10):(4,0x47), (0,0x11):(4,0x48),
+                  (0,0x12):(4,0x49), (1,0x30):(5,0x47),
+                  (1,0x31):(5,0x48), (1,0x32):(5,0x49),
+                  (0,0x52):(4,0x47), (0,0x53):(4,0x48),
                   (1,0x54):(5,0x47), (1,0x55):(5,0x48)}
     if typ in (0x80, 0x90) and (ch, d1) in fx_buttons:
         target_ch, note = fx_buttons[(ch, d1)]
         return pack(0x90 | target_ch, note, d2)
+    # DDJ-SX has no factual Filter On/Off message; its documented CFX button
+    # centers/resets the filter parameter. Use that exact function for FX4.
+    if typ in (0x80, 0x90) and (ch, d1) in ((0, 0x13), (1, 0x33)):
+        return pack(0x96, 0x74 if ch == 0 else 0x75, d2)
     if typ in (0x80, 0x90) and ch in (0, 1) and (ch, d1) in button:
         if (ch, d1) == (0, 0x50):
             return pack(0x96, 0x46, d2)
@@ -166,6 +176,10 @@ def main():
         in_handle = wintypes.HANDLE(); out_handle = wintypes.HANDLE()
         r = winmm.midiOutOpen(ctypes.byref(out_handle), out_id, 0, 0, 0)
         if r != MMSYSERR_NOERROR: raise RuntimeError(f"midiOutOpen Fehler {r}")
+        # Enable Key Lock before accepting any pitch-fader messages so the
+        # first tempo move cannot briefly change the musical key.
+        winmm.midiOutShortMsg(out_handle, pack(0x90, 0x1A, 0x7F))
+        winmm.midiOutShortMsg(out_handle, pack(0x91, 0x1A, 0x7F))
         r = winmm.midiInOpen(ctypes.byref(in_handle), in_id, ctypes.cast(callback, ctypes.c_void_p), 0, CALLBACK_FUNCTION)
         if r != MMSYSERR_NOERROR: raise RuntimeError(f"midiInOpen Fehler {r}")
         winmm.midiInStart(in_handle)
