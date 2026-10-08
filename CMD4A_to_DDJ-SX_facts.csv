@@ -1,8 +1,8 @@
 source,source_midi,output,output_midi,confidence,source_basis
-CMD Jog A,CC ch1 0x1A,DDJ-SX JogScratch,CC ch1 0x0A,fact,CMD Mixxx XML + RekordJog DDJ-SX map
-CMD Jog B,CC ch2 0x3A,DDJ-SX JogScratch,CC ch2 0x0A,fact,CMD Mixxx XML + RekordJog DDJ-SX map
-CMD Touch A,Note ch1 0x1A,DDJ-SX JogTouch,Note ch1 0x08,fact,CMD Mixxx XML + RekordJog DDJ-SX map
-CMD Touch B,Note ch2 0x3A,DDJ-SX JogTouch,Note ch2 0x08,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Jog A,CC ch1 0x1A,DDJ-SX JogScratch,CC ch1 0x22,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Jog B,CC ch2 0x3A,DDJ-SX JogScratch,CC ch2 0x22,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Touch A,Note ch1 0x1A,DDJ-SX JogTouch,Note ch1 0x36,fact,CMD Mixxx XML + RekordJog DDJ-SX map
+CMD Touch B,Note ch2 0x3A,DDJ-SX JogTouch,Note ch2 0x36,fact,CMD Mixxx XML + RekordJog DDJ-SX map
 CMD Pitch A,Pitch Bend ch1,DDJ-SX TempoSlider,CC ch1 0x00+0x20,fact,CMD Mixxx XML + RekordJog DDJ-SX map
 CMD Pitch B,Pitch Bend ch2,DDJ-SX TempoSlider,CC ch2 0x00+0x20,fact,CMD Mixxx XML + RekordJog DDJ-SX map
 CMD Play A,Note ch1 0x2C,DDJ-SX PlayPause,Note ch16 0x22,fact-derived,equal function name in CMD XML and DDJ-SX controller map

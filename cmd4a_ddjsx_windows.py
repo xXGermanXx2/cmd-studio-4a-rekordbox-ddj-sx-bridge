@@ -76,12 +76,13 @@ def translate(status, d1, d2):
     if typ == 0xB0 and (ch, d1) in analog:
         target_ch, msb, lsb = analog[(ch, d1)]
         return (pack(0xB0 | target_ch, msb, d2), pack(0xB0 | target_ch, lsb, 0))
-    # Jog: CMD CC 0x1A/0x3A -> DDJ-SX CC 0x0A.
+    # Official DDJ-SX list: platter jog is CC 0x22; limit to its documented
+    # relative range (34..63 CCW, 65..89 CW).
     if typ == 0xB0 and ch in (0, 1) and d1 in (0x1A, 0x3A):
-        return pack(0xB0 | ch, 0x0A, max(1, min(127, d2)))
-    # Jog touch: CMD notes 0x1A/0x3A -> DDJ-SX note 0x08.
+        return pack(0xB0 | ch, 0x22, max(34, min(89, d2)))
+    # Jog touch: CMD notes 0x1A/0x3A -> official DDJ-SX note 0x36.
     if typ in (0x80, 0x90) and ch in (0, 1) and d1 in (0x1A, 0x3A):
-        return pack(typ | ch, 0x08, d2)
+        return pack(typ | ch, 0x36, d2)
     # Pitch bend: CMD 14-bit pitch -> DDJ-SX 14-bit CC 0x00 + 0x20.
     if typ == 0xE0 and ch in (0, 1):
         value = d1 | (d2 << 7)

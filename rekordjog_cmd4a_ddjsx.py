@@ -61,9 +61,11 @@ def select_port(ports, hint, kind):
 
 
 def send_jog(out, deck, raw):
-    # CMD definition uses wheel delta raw-64; DDJ-SX uses 64 as neutral.
-    value = max(1, min(127, 64 + (raw - 64)))
-    out.send(mido.Message('control_change', channel=deck, control=0x0A, value=value))
+    # Official DDJ-SX list: platter jog is CC 0x22; 64 is neutral.
+    # Keep the CMD relative value while limiting it to the documented DDJ-SX
+    # relative range (34..63 CCW, 65..89 CW).
+    value = max(34, min(89, raw))
+    out.send(mido.Message('control_change', channel=deck, control=0x22, value=value))
 
 
 def send_pitch(out, msg):
@@ -87,11 +89,11 @@ def translate(msg, out, passthrough=False, monitor=False):
     elif msg.type == 'control_change' and (msg.channel, msg.control) in JOG_INPUT:
         deck = JOG_INPUT[(msg.channel, msg.control)]
         send_jog(out, deck, msg.value)
-        result = f"JOG Deck {deck+1}: CC {msg.control:#04x} -> DDJ-SX CC 0x0A"
+        result = f"JOG Deck {deck+1}: CC {msg.control:#04x} -> DDJ-SX CC 0x22"
     elif msg.type in ('note_on', 'note_off') and key in TOUCH_INPUT:
         deck = TOUCH_INPUT[key]
-        out.send(mido.Message(msg.type, channel=deck, note=0x08, velocity=msg.velocity))
-        result = f"TOUCH Deck {deck+1}: Note {msg.note:#04x} -> DDJ-SX Note 0x08"
+        out.send(mido.Message(msg.type, channel=deck, note=0x36, velocity=msg.velocity))
+        result = f"TOUCH Deck {deck+1}: Note {msg.note:#04x} -> DDJ-SX Note 0x36"
     elif msg.type == 'pitchwheel' and msg.channel in PITCH_CHANNELS:
         send_pitch(out, msg)
         result = f"PITCH Deck {msg.channel+1}: -> DDJ-SX CC 0x00/0x20"

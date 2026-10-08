@@ -113,8 +113,8 @@ Der virtuelle Port muss exakt `PIONEER DDJ-SX` heißen. Zusätzlich liegt `PIONE
 
 | Bereich | Umsetzung |
 |---|---|
-| Jog A/B | CMD CC 0x1A/0x3A → DDJ-SX CC 0x0A |
-| Jog-Touch A/B | CMD Note 0x1A/0x3A → DDJ-SX Note 0x08 |
+| Jog A/B | CMD CC 0x1A/0x3A → DDJ-SX CC 0x22 |
+| Jog-Touch A/B | CMD Note 0x1A/0x3A → DDJ-SX Note 0x36 |
 | Pitchfader A/B | CMD Pitch-Bend → DDJ-SX 14-bit CC 0x00 + 0x20 |
 
 Die Eingangs-Codes stammen aus der offiziellen Mixxx-CMD-Definition; die Ausgangs-Codes aus der DDJ-SX-rekordbox-MIDI-Map. Siehe `CMD4A_to_DDJ-SX_facts.csv`.
