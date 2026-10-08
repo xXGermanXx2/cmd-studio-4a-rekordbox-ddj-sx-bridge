@@ -130,13 +130,12 @@ def translate(status, d1, d2, filter_state=None, pad_mode=None):
         msb, lsb = value >> 7, value & 0x7F
         return (pack(0xB0 | ch, 0x00, msb),
                 pack(0xB0 | ch, 0x20, lsb))
-    # CMD DEL changes the bridge's local pad mode. Do not send the two
-    # rekordbox mode-button messages here: they make rekordbox's mode display
-    # visibly toggle twice. The pad messages below select the mapped function
-    # directly on the DDJ-SX deck channels.
+    # CMD DEL changes the deck's pad mode. Send exactly one mode command per
+    # press; sending both modes in one event makes rekordbox's display flicker.
     if typ in (0x80, 0x90) and d2 and (ch, d1) in ((0, 0x2A), (1, 0x4A)):
         pad_mode[ch] = "beatjump" if pad_mode[ch] == "hotcue" else "hotcue"
-        return None
+        mode_note = 0x69 if pad_mode[ch] == "beatjump" else 0x1B
+        return pack(0x90 | ch, mode_note, d2)
     # Equal-function buttons: CMD note -> DDJ-SX note on channel 16.
     button = {
         (0,0x2C):0x0B, (1,0x4C):0x0B,  # Play/Pause
