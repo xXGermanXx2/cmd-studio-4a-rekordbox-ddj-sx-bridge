@@ -69,11 +69,13 @@ def pack(status, d1=0, d2=0):
     return (status & 0xFF) | ((d1 & 0x7F) << 8) | ((d2 & 0x7F) << 16)
 
 
-def translate(status, d1, d2, filter_state=None):
+def translate(status, d1, d2, filter_state=None, pad_mode=None):
     typ, ch = status & 0xF0, status & 0x0F
     if filter_state is None:
         filter_state = {"value": {0: 0x40, 1: 0x40},
                         "active": {0: True, 1: True}}
+    if pad_mode is None:
+        pad_mode = {0: "hotcue", 1: "hotcue"}
     # Hard priority: the documented CMD jog messages are handled before any
     # button map. They must never be interpreted as Cue or another button.
     if (status, d1) in ((0xB0, 0x1A), (0xB1, 0x3A)):
@@ -128,6 +130,11 @@ def translate(status, d1, d2, filter_state=None):
         msb, lsb = value >> 7, value & 0x7F
         return (pack(0xB0 | ch, 0x00, msb),
                 pack(0xB0 | ch, 0x20, lsb))
+    # CMD DEL buttons are deck-local mode switches. They intentionally do
+    # not send a DDJ-SX command themselves; they change the pad translation.
+    if typ in (0x80, 0x90) and d2 and (ch, d1) in ((0, 0x2A), (1, 0x4A)):
+        pad_mode[ch] = "beatjump" if pad_mode[ch] == "hotcue" else "hotcue"
+        return None
     # Equal-function buttons: CMD note -> DDJ-SX note on channel 16.
     button = {
         (0,0x2C):0x0B, (1,0x4C):0x0B,  # Play/Pause
@@ -146,6 +153,8 @@ def translate(status, d1, d2, filter_state=None):
         hotcue[(1, note)] = (8, i)
     if typ in (0x80, 0x90) and (ch, d1) in hotcue:
         target_ch, note = hotcue[(ch, d1)]
+        if pad_mode[ch] == "beatjump":
+            note = 0x40 + (note % 8)
         return pack(0x90 | target_ch, note, d2)
     # FX1/FX2/FX3 buttons -> their matching DDJ-SX FX parameter ON messages.
     fx_buttons = {(0,0x10):(4,0x47), (0,0x11):(4,0x48),
@@ -288,6 +297,7 @@ def main():
         led_state = {}
         filter_state = {"value": {0: 0x40, 1: 0x40},
                         "active": {0: True, 1: True}}
+        pad_mode = {0: "hotcue", 1: "hotcue"}
         feedback_line = (f"LED-Feedback: {ins[feedback_in_id][1]} -> {outs[led_out_id][1]}"
                          if feedback_in_id is not None else
                          "LED-Feedback: lokale Simulation")
@@ -310,7 +320,7 @@ def main():
                     local_led = local_led_feedback(status, d1, d2, led_state)
                     if local_led is not None:
                         winmm.midiOutShortMsg(led_handle, local_led)
-                    result = translate(status, d1, d2, filter_state)
+                    result = translate(status, d1, d2, filter_state, pad_mode)
                     destination = out_handle
                 if result is None: continue
                 packets = result if isinstance(result, tuple) else (result,)

@@ -11,6 +11,7 @@ Windows-MIDI-Bridge für den Behringer CMD Studio 4A. Die Bridge übersetzt die 
 - Jogwheel mit Touch, Scratch/Search und Release-Verhalten
 - Pitchfader, EQ, Gain, Kanal-Fader und Crossfader
 - Play/Pause, Cue, Sync, Hot Cues und Load
+- DEL-Taste als Umschalter zwischen Hot Cue und Beat Jump
 - Browser, FX und AutoLoop
 - Lokale LED-Steuerung ohne MIDI-OUT-Feedback-Schleife
 - FX1, FX2 und FX3 mit jeweils eigenem Parameter und An/Aus-Taste
@@ -127,6 +128,10 @@ werden so übersetzt:
 | FX2-Regler und FX2-Taste | DDJ-SX FX1-Parameter 2 und An/Aus |
 | FX3-Regler und FX3-Taste | DDJ-SX FX1-Parameter 3 und An/Aus |
 | FX4-Regler und FX4-Taste | High-/Low-Pass-Filter und Filter An/Aus |
+
+Die DEL-Taste arbeitet deckweise: `90 2A` schaltet die linken acht Pads um,
+`91 4A` die rechten acht Pads. Ein weiterer Druck stellt den jeweiligen
+Hot-Cue-Modus wieder her.
 
 Beim FX4-Filter bedeutet Aus den neutralen Mittelpunkt. Beim erneuten
 Einschalten wird die zuletzt eingestellte Filterposition wiederhergestellt.
