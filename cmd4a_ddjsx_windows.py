@@ -12,7 +12,7 @@ import queue
 import sys
 import time
 
-RELEASE = "2026.10.08-windows-pure-complete"
+RELEASE = "2026.10.08-original-ddjsx-map"
 
 winmm = ctypes.WinDLL("winmm.dll")
 MIDI_CALLBACK = ctypes.WINFUNCTYPE(None, wintypes.HANDLE, wintypes.UINT,
@@ -72,12 +72,12 @@ def translate(status, d1, d2):
         (0, 0x60):(0,0x07,0x27), (1,0x63):(1,0x07,0x27),
         (0, 0x61):(0,0x0B,0x2B), (1,0x64):(1,0x0B,0x2B),
         (0, 0x62):(0,0x0F,0x2F), (1,0x65):(1,0x0F,0x2F),
-        (0, 0x70):(0,0x1F,0x3F), (1,0x71):(1,0x1F,0x3F),
+        (0, 0x70):(0,0x13,0x00), (1, 0x71):(1,0x13,0x00),
         (0, 0x72):(6,0x1F,0x3F),
     }
     if typ == 0xB0 and (ch, d1) in analog:
         target_ch, msb, lsb = analog[(ch, d1)]
-        return (pack(0xB0 | target_ch, msb, d2), pack(0xB0 | target_ch, lsb, 0))
+        return pack(0xB0 | target_ch, msb, d2)
     # CMD FX knobs 2/3 -> official DDJ-SX FX1/FX2 parameter MSB+LSB pairs.
     fx_knobs = {
         (0, 0x11):(4, 0x02, 0x22), (0, 0x12):(4, 0x04, 0x24),
@@ -85,7 +85,7 @@ def translate(status, d1, d2):
     }
     if typ == 0xB0 and (ch, d1) in fx_knobs:
         target_ch, msb, lsb = fx_knobs[(ch, d1)]
-        return (pack(0xB0 | target_ch, msb, d2), pack(0xB0 | target_ch, lsb, 0))
+        return pack(0xB0 | target_ch, msb, d2)
     # Official DDJ-SX list: platter jog is CC 0x22; limit to its documented
     # relative range (34..63 CCW, 65..89 CW).
     if typ == 0xB0 and ch in (0, 1) and d1 in (0x1A, 0x3A):
@@ -100,15 +100,20 @@ def translate(status, d1, d2):
         return (pack(0xB0 | ch, 0x00, msb), pack(0xB0 | ch, 0x20, lsb))
     # Equal-function buttons: CMD note -> DDJ-SX note on channel 16.
     button = {
-        (0,0x2C):0x22, (1,0x4C):0x42, (0,0x2B):0x14, (1,0x4B):0x34,
-        (0,0x2D):0x25, (1,0x4D):0x45,
-        (0,0x17):0x0E, (1,0x38):0x2E, (0,0x18):0x10, (1,0x37):0x30,
-        (0,0x22):0x1D, (1,0x42):0x3D, (0,0x23):0x0F, (1,0x43):0x2F,
-        (0,0x24):0x11, (1,0x44):0x31, (0,0x25):0x1B, (1,0x45):0x3B,
-        (0,0x26):0x24, (1,0x46):0x44, (0,0x27):0x15, (1,0x47):0x35,
-        (0,0x28):0x12, (1,0x48):0x32, (0,0x29):0x20, (1,0x49):0x40,
-        (0,0x50):0x0A, (1,0x51):0x2A,  # Load, DDJ-SX status 0x9E
+        (0,0x2C):0x0B, (1,0x4C):0x0B,  # Play/Pause
+        (0,0x2B):0x0C, (1,0x4B):0x0C,  # Cue
+        (0,0x2D):0x58, (1,0x4D):0x58,  # Sync
+        (0,0x17):0x10, (1,0x38):0x10,  # Loop In
+        (0,0x18):0x11, (1,0x37):0x11,  # Loop Out
     }
+    hotcue = {}
+    for i, note in enumerate(range(0x22, 0x2A)):
+        hotcue[(0, note)] = (7, i)
+    for i, note in enumerate(range(0x42, 0x4A)):
+        hotcue[(1, note)] = (8, i)
+    if typ in (0x80, 0x90) and (ch, d1) in hotcue:
+        target_ch, note = hotcue[(ch, d1)]
+        return pack(0x90 | target_ch, note, d2)
     # FX assign 1/2: official DDJ-SX FX1/FX2 ON messages.
     fx_buttons = {(0,0x52):(4,0x47), (0,0x53):(4,0x48),
                   (1,0x54):(5,0x47), (1,0x55):(5,0x48)}
@@ -116,8 +121,11 @@ def translate(status, d1, d2):
         target_ch, note = fx_buttons[(ch, d1)]
         return pack(0x90 | target_ch, note, d2)
     if typ in (0x80, 0x90) and ch in (0, 1) and (ch, d1) in button:
-        status = 0x9E if (ch, d1) in ((0, 0x50), (1, 0x51)) else 0x9F
-        return pack(status, button[(ch, d1)], d2)
+        if (ch, d1) == (0, 0x50):
+            return pack(0x96, 0x46, d2)
+        if (ch, d1) == (1, 0x51):
+            return pack(0x96, 0x47, d2)
+        return pack(0x90 | ch, button[(ch, d1)], d2)
     return None
 
 
