@@ -2,39 +2,39 @@
 #release,2026.10.08-windows-pure-complete,,,,,,,,,,,,
 #name,function,type,input,deck1,deck2,deck3,deck4,output,deck1,deck2,deck3,deck4,option,comment
 ,,,,,,,,,,,,,,
-JogScratch,JogScratch,JogRotate,B00A,1,2,,,,,,,,,RO,Scratch
-JogSearch,JogSearch,Difference,B00A,4,5,,,,,,,,,RO,Search
-JogTouch,JogTouch,JogTouch,9008,1,2,,,,,,,,,RO,Touch
-JogTouch,JogTouch+Shift,JogTouch,9008,4,5,,,,,,,,,RO,Touch
-WheelPitchBend,WheelPitchBend,JogRotate,B009,1,2,,,,,,,,,RO,Pitch Bend
-WheelSearch,WheelSearch,JogRotate,B009,4,5,,,,,,,,,RO,Pitch Bend
-TempoSlider,TempoSlider,KnobSlider,B070,1,2,,,,,,,,,Fast,Tempo Control
-TempoSlider,TempoSlider+Shift,KnobSlider,B070,4,5,,,,,,,,,Fast,Tempo Control
-PlayPause,PlayPause,Button,9F22,1,2,,,,,,,,,Fast;Blink=1000;Priority=50,
-Cue,Cue,Button,9F14,1,2,,,,,,,,,Fast;Blink=500;Priority=50,
-Sync,Sync,Button,9F25,1,2,,,,,,,,,Blink=600,
-PAD1_HotCue,PAD1_HotCue,DdjSxPad,9F1D,1,2,,,,,,,,,Fast,
-PAD2_HotCue,PAD2_HotCue,DdjSxPad,9F0F,1,2,,,,,,,,,Fast,
-PAD3_HotCue,PAD3_HotCue,DdjSxPad,9F11,1,2,,,,,,,,,Fast,
-PAD4_HotCue,PAD4_HotCue,DdjSxPad,9F1B,1,2,,,,,,,,,Fast,
-PAD5_HotCue,PAD5_HotCue,DdjSxPad,9F24,1,2,,,,,,,,,Fast,
-PAD6_HotCue,PAD6_HotCue,DdjSxPad,9F15,1,2,,,,,,,,,Fast,
-PAD7_HotCue,PAD7_HotCue,DdjSxPad,9F12,1,2,,,,,,,,,Fast,
-PAD8_HotCue,PAD8_HotCue,DdjSxPad,9F20,1,2,,,,,,,,,Fast,
-LoopIn,LoopIn,Button,9F0E,1,2,,,,,,,,,Fast,
-LoopOut,LoopOut,Button,9F10,1,2,,,,,,,,,Fast,
-Load,Load,Button,9E0A,1,2,,,,,,,,,,
-TRIM,TRIM,KnobSlider,B004,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B024
-EQ_HIGH,EQ_HIGH,KnobSlider,B007,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B027
-EQ_MID,EQ_MID,KnobSlider,B00B,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B02B
-EQ_LOW,EQ_LOW,KnobSlider,B00F,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B02F
-CHANNEL_FADER,CHANNEL_FADER,KnobSlider,B01F,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B03F
-CROSSFADER,CROSSFADER,KnobSlider,B61F,7,,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B63F
-FX1_PARAM1,FX1_PARAM1,KnobSlider,B402,5,,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B422
-FX1_PARAM2,FX1_PARAM2,KnobSlider,B404,5,,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B424
-FX2_PARAM1,FX2_PARAM1,KnobSlider,B502,6,,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B522
-FX2_PARAM2,FX2_PARAM2,KnobSlider,B504,6,,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B524
-FX1_ON_1,FX1_ON_1,Button,9447,5,,,,,,,,,,,DDJ-SX FX1-1 ON
-FX1_ON_2,FX1_ON_2,Button,9448,5,,,,,,,,,,,DDJ-SX FX1-2 ON
-FX2_ON_1,FX2_ON_1,Button,9547,6,,,,,,,,,,,DDJ-SX FX2-1 ON
-FX2_ON_2,FX2_ON_2,Button,9548,6,,,,,,,,,,,DDJ-SX FX2-2 ON
+JogScratch,JogScratch,JogRotate,B00A,1,2,,,,,,,,RO,Scratch
+JogSearch,JogSearch,Difference,B00A,4,5,,,,,,,,RO,Search
+JogTouch,JogTouch,JogTouch,9008,1,2,,,,,,,,RO,Touch
+JogTouch,JogTouch+Shift,JogTouch,9008,4,5,,,,,,,,RO,Touch
+WheelPitchBend,WheelPitchBend,JogRotate,B009,1,2,,,,,,,,RO,Pitch Bend
+WheelSearch,WheelSearch,JogRotate,B009,4,5,,,,,,,,RO,Pitch Bend
+TempoSlider,TempoSlider,KnobSlider,B070,1,2,,,,,,,,Fast,Tempo Control
+TempoSlider,TempoSlider+Shift,KnobSlider,B070,4,5,,,,,,,,Fast,Tempo Control
+PlayPause,PlayPause,Button,9F22,1,2,,,,,,,,Fast;Blink=1000;Priority=50,
+Cue,Cue,Button,9F14,1,2,,,,,,,,Fast;Blink=500;Priority=50,
+Sync,Sync,Button,9F25,1,2,,,,,,,,Blink=600,
+PAD1_HotCue,PAD1_HotCue,DdjSxPad,9F1D,1,2,,,,,,,,Fast,
+PAD2_HotCue,PAD2_HotCue,DdjSxPad,9F0F,1,2,,,,,,,,Fast,
+PAD3_HotCue,PAD3_HotCue,DdjSxPad,9F11,1,2,,,,,,,,Fast,
+PAD4_HotCue,PAD4_HotCue,DdjSxPad,9F1B,1,2,,,,,,,,Fast,
+PAD5_HotCue,PAD5_HotCue,DdjSxPad,9F24,1,2,,,,,,,,Fast,
+PAD6_HotCue,PAD6_HotCue,DdjSxPad,9F15,1,2,,,,,,,,Fast,
+PAD7_HotCue,PAD7_HotCue,DdjSxPad,9F12,1,2,,,,,,,,Fast,
+PAD8_HotCue,PAD8_HotCue,DdjSxPad,9F20,1,2,,,,,,,,Fast,
+LoopIn,LoopIn,Button,9F0E,1,2,,,,,,,,Fast,
+LoopOut,LoopOut,Button,9F10,1,2,,,,,,,,Fast,
+Load,Load,Button,9E0A,1,2,,,,,,,,,
+TRIM,TRIM,KnobSlider,B004,1,2,,,,,,,,,DDJ-SX 14-bit MSB; LSB B024
+EQ_HIGH,EQ_HIGH,KnobSlider,B007,1,2,,,,,,,,,DDJ-SX 14-bit MSB; LSB B027
+EQ_MID,EQ_MID,KnobSlider,B00B,1,2,,,,,,,,,DDJ-SX 14-bit MSB; LSB B02B
+EQ_LOW,EQ_LOW,KnobSlider,B00F,1,2,,,,,,,,,DDJ-SX 14-bit MSB; LSB B02F
+CHANNEL_FADER,CHANNEL_FADER,KnobSlider,B01F,1,2,,,,,,,,,DDJ-SX 14-bit MSB; LSB B03F
+CROSSFADER,CROSSFADER,KnobSlider,B61F,7,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B63F
+FX1_PARAM1,FX1_PARAM1,KnobSlider,B402,5,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B422
+FX1_PARAM2,FX1_PARAM2,KnobSlider,B404,5,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B424
+FX2_PARAM1,FX2_PARAM1,KnobSlider,B502,6,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B522
+FX2_PARAM2,FX2_PARAM2,KnobSlider,B504,6,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B524
+FX1_ON_1,FX1_ON_1,Button,9447,5,,,,,,,,,,DDJ-SX FX1-1 ON
+FX1_ON_2,FX1_ON_2,Button,9448,5,,,,,,,,,,DDJ-SX FX1-2 ON
+FX2_ON_1,FX2_ON_1,Button,9547,6,,,,,,,,,,DDJ-SX FX2-1 ON
+FX2_ON_2,FX2_ON_2,Button,9548,6,,,,,,,,,,DDJ-SX FX2-2 ON
