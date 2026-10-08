@@ -130,13 +130,17 @@ def translate(status, d1, d2, filter_state=None, pad_mode=None):
         msb, lsb = value >> 7, value & 0x7F
         return (pack(0xB0 | ch, 0x00, msb),
                 pack(0xB0 | ch, 0x20, lsb))
-    # CMD DEL buttons switch the mapping mode. 901B is Hot Cue mode and 9069
-    # is Beat Jump mode on the mapping's control channels. Pad messages below
-    # remain on the DDJ-SX deck channels 7/8, so they cannot trigger Slip.
+    # CMD DEL buttons switch the deck's mapping mode. 901B is Hot Cue mode
+    # and 9069 is Beat Jump mode. Turn the old mode off first; otherwise both
+    # modes stay enabled and Beat Jump can keep taking priority.
     if typ in (0x80, 0x90) and d2 and (ch, d1) in ((0, 0x2A), (1, 0x4A)):
         pad_mode[ch] = "beatjump" if pad_mode[ch] == "hotcue" else "hotcue"
-        mode_note = 0x69 if pad_mode[ch] == "beatjump" else 0x1B
-        return pack(0x90, mode_note, d2)
+        mode_status = 0x90 | ch
+        if pad_mode[ch] == "beatjump":
+            return (pack(mode_status, 0x1B, 0x00),
+                    pack(mode_status, 0x69, d2))
+        return (pack(mode_status, 0x69, 0x00),
+                pack(mode_status, 0x1B, d2))
     # Equal-function buttons: CMD note -> DDJ-SX note on channel 16.
     button = {
         (0,0x2C):0x0B, (1,0x4C):0x0B,  # Play/Pause
