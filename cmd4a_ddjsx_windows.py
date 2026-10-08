@@ -117,7 +117,11 @@ def main():
         print(f"Eingang: {ins[in_id][1]}\nAusgang: {outs[out_id][1]}\nStrg+C beendet.")
         try:
             while True:
-                raw = events.get(timeout=0.1)
+                try:
+                    raw = events.get(timeout=0.1)
+                except queue.Empty:
+                    # Normalzustand: Der Controller sendet nicht permanent.
+                    continue
                 status, d1, d2 = raw & 255, (raw >> 8) & 127, (raw >> 16) & 127
                 result = translate(status, d1, d2)
                 if result is None: continue
