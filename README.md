@@ -1,171 +1,112 @@
-# CMD Studio 4A → rekordbox 7 (2 Decks)
+# CMD Studio 4A → rekordbox 7 / DDJ-SX
 
-Dieses Paket ist eine **MIDI-Bridge** für den Behringer CMD Studio 4A. Sie empfängt die MIDI-Daten des Controllers und sendet sie an einen virtuellen MIDI-Ausgang, den rekordbox 7 als MIDI-Gerät verwenden kann.
+Windows-MIDI-Bridge für den Behringer CMD Studio 4A. Die Bridge übersetzt die MIDI-Daten des CMD Studio 4A in DDJ-SX-kompatible Nachrichten für rekordbox 7.
 
-## Wichtige technische Grenze
+## Windows-Version ohne C++
 
-Rekordbox bietet keine öffentliche Python-API, mit der ein externes Script Play, Cue oder Jog direkt aufrufen kann. Deshalb ist der korrekte und stabile Weg:
+Verwendete Datei:
 
-1. CMD Studio 4A → Python-Bridge
-2. Python-Bridge → virtueller MIDI-Port
-3. virtueller MIDI-Port → einmaliges MIDI-Mapping in rekordbox 7
-
-Das Script ist somit kein inoffizieller Tastatur-Hack und verändert keine rekordbox-Dateien.
-
-## Installation
-
-### Windows
-
-1. [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) installieren.
-2. Einen virtuellen Port mit dem Namen `CMD4A rekordbox` anlegen.
-3. Python 3 installieren und im Paketordner ausführen:
-
-```bat
-py -m pip install -r requirements.txt
-py cmd4a_rekordbox_bridge.py --list
+```text
+cmd4a_ddjsx_windows.py
 ```
 
-4. Den Gerätenamen aus `--list` übernehmen. Starten:
+Die Datei verwendet ausschließlich:
 
-```bat
-py cmd4a_rekordbox_bridge.py --input "CMD Studio 4A" --output "CMD4A rekordbox" --monitor
+- Python-Standardbibliothek
+- Windows `winmm.dll`
+- keinen C++-Compiler
+- kein `pip`
+- kein `mido`
+- kein `python-rtmidi`
+
+Zusätzlich wird ein virtueller MIDI-Treiber wie [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) benötigt.
+
+## Einrichtung
+
+1. CMD Studio 4A per USB anschließen.
+2. loopMIDI starten.
+3. Einen virtuellen Port exakt mit diesem Namen anlegen:
+
+```text
+PIONEER DDJ-SX
 ```
 
-Alternativ `start_windows.bat` anpassen und doppelklicken.
-
-### macOS
-
-1. In **Audio-MIDI-Setup → Fenster → MIDI-Studio** das **IAC-Treibersystem** aktivieren.
-2. Einen Port `CMD4A rekordbox` anlegen.
-3. Im Paketordner:
-
-```bash
-python3 -m pip install -r requirements.txt
-python3 cmd4a_rekordbox_bridge.py --list
-python3 cmd4a_rekordbox_bridge.py --input "CMD Studio 4A" --output "CMD4A rekordbox" --monitor
-```
-
-## rekordbox 7 einrichten
-
-1. Bridge starten.
-2. In rekordbox: **Preferences → Controller → MIDI**.
-3. Als MIDI-Gerät den virtuellen Port `CMD4A rekordbox` auswählen.
-4. Für jede Funktion **Learn** wählen und den jeweiligen Regler/Button am CMD Studio 4A bewegen.
-5. Mapping speichern.
-
-Rekordbox erkennt dann die weitergeleiteten Original-MIDI-Nachrichten. Bei `--monitor` sieht man die Werte vorher im Terminal.
-
-## Empfohlenes Zwei-Deck-Mapping
-
-| CMD Studio 4A | Rekordbox-Funktion | MIDI-Nachricht aus dem Controller |
-|---|---|---|
-| Play links/rechts | Play/Pause Deck 1/2 | Note On, Kanal 1/2 |
-| Cue links/rechts | Cue Deck 1/2 | Note On, Kanal 1/2 |
-| Jogwheel | Jog / Vinyl | Pitch Bend bzw. relative Daten, Kanal 1/2 |
-| Pitchfader | Tempo | CC, Kanal 1/2 |
-| Kanal-Fader | Volume Deck 1/2 | CC, Kanal 1/2 |
-| Crossfader | Crossfader | CC, Kanal 1 |
-| Gain | Trim/Gain Deck 1/2 | CC 16 / CC 48 |
-| EQ High/Mid/Low | EQ Deck 1/2 | jeweilige CC-Werte per Learn ermitteln |
-| Hot Cue 1–8 | Hot Cue 1–8 | Note On, Kanal 1/2 |
-| Loop In/Out/On-Off | Loop-Steuerung | Note On, Kanal 1/2 |
-| Browse/Enter | Bibliothek | CC/Note auf Kanal 1 |
-
-Die Tabelle nennt bewusst die Learn-Funktion als letzte Instanz: Je nach Firmware-Revision und Betriebssystem können Note-Off, LED-Rückmeldung und Jogwheel-Message unterschiedlich erscheinen. Mit dem beiliegenden Monitor werden die tatsächlich gesendeten Werte des eigenen Geräts angezeigt.
-
-## Bedienung / Diagnose
-
-Nur Ports anzeigen:
-
-```bash
-python cmd4a_rekordbox_bridge.py --list
-```
-
-Nur MIDI sehen, ohne rekordbox-Ausgang:
-
-```bash
-python cmd4a_rekordbox_bridge.py --input "CMD Studio 4A" --no-forward --monitor
-```
-
-Standardmäßig werden nur die beiden physischen Deck-Kanäle 1 und 2 weitergeleitet. Für einen vollständigen Rohdaten-Test:
-
-```bash
-python cmd4a_rekordbox_bridge.py --input "CMD Studio 4A" --output "CMD4A rekordbox" --all-channels --monitor
-```
-
-## Quellen
-
-- [Mixxx CMD Studio 4A Controller-Definition](https://github.com/mixxxdj/mixxx/blob/main/res/controllers/Behringer%20CMDStudio4a.midi.xml)
-- [Mixxx CMD Studio 4A Script](https://github.com/mixxxdj/mixxx/blob/main/res/controllers/Behringer-CMDStudio4a-scripts.js)
-- [Mixxx-Dokumentation zum CMD Studio 4A](https://manual.mixxx.org/2.5/fi/hardware/controllers/behringer_cmd_studio_4a)
-
-## DDJ-SX-Emulation ohne Jogwheel-MIDI-Learn
-
-Die Datei `rekordjog_cmd4a_ddjsx.py` sendet den CMD Studio 4A als DDJ-SX-kompatible Signale:
-
-```bash
-python rekordjog_cmd4a_ddjsx.py --input "CMD Studio 4A" --output "PIONEER DDJ-SX" --monitor
-```
-
-Der virtuelle Port muss exakt `PIONEER DDJ-SX` heißen. Zusätzlich liegt `PIONEER DDJ-SX.midi.csv` bei. Diese Datei ist die DDJ-SX-MIDI-Map aus dem RekordJog-Projekt und muss nach dessen Anleitung in den rekordbox-Ordner `MidiMappings` übernommen werden. Vorher den Originalordner sichern.
-
-### Fakt umgesetzt
-
-| Bereich | Umsetzung |
-|---|---|
-| Jog A/B | CMD CC 0x1A/0x3A → DDJ-SX CC 0x22 |
-| Jog-Touch A/B | CMD Note 0x1A/0x3A → DDJ-SX Note 0x36 |
-| Pitchfader A/B | CMD Pitch-Bend → DDJ-SX 14-bit CC 0x00 + 0x20 |
-
-Die Eingangs-Codes stammen aus der offiziellen Mixxx-CMD-Definition; die Ausgangs-Codes aus der DDJ-SX-rekordbox-MIDI-Map. Siehe `CMD4A_to_DDJ-SX_facts.csv`.
-
-### Bewusst nicht behauptet
-
-Für Play, Cue, Hot-Cue, Loop, FX und LEDs gibt es in den beiden Quellen keine eindeutige 1:1-Beziehung zwischen CMD-Bedienelement und DDJ-SX-Bedienelement. Diese werden in dieser Emulationsdatei nicht erfunden. Mit `--passthrough` können sie zusätzlich roh weitergeleitet werden, sind dadurch aber nicht automatisch in rekordbox belegt.
-
-## Vollständige gleichnamige Tastenübersetzung
-
-Die DDJ-SX-Bridge übersetzt jetzt zusätzlich faktisch abgeleitet:
-
-- Play/Pause Deck A/B
-- Cue Deck A/B
-- Sync Deck A/B
-- Hot Cue 1–8 Deck A/B
-- Loop In Deck A/B
-- Loop Out Deck A/B
-
-Diese Zuordnungen verbinden nur gleichnamige Funktionen aus der CMD-Definition und der DDJ-SX-Controller-Map. Die einzelnen Eingangs- und Ausgangsbytes stehen in `CMD4A_to_DDJ-SX_facts.csv`.
-
-FX-Assign-Tasten und FX-Regler bleiben absichtlich unübersetzt: Die DDJ-SX-Map enthält dort keine eindeutige gleichnamige rekordbox-Funktion, die eine belastbare 1:1-Zuordnung erlauben würde. Eine FX-Zuordnung wäre daher eine kreative Belegung und keine Fakt-Daten-Übersetzung.
-
-## Windows-Version ohne C++ und ohne pip-Pakete
-
-Wenn keine C++-Build-Tools installiert werden sollen, benutze `cmd4a_ddjsx_windows.py`. Diese Version verwendet ausschließlich Python-Standardbibliothek und die bereits in Windows enthaltene `winmm.dll`.
-
-Es ist **kein** `pip install`, kein `mido`, kein `python-rtmidi` und kein C++-Compiler erforderlich. Voraussetzung bleibt nur Python 3 und ein virtueller MIDI-Treiber wie loopMIDI.
+4. Die Datei `PIONEER DDJ-SX.midi.csv` in den `MidiMappings`-Ordner der verwendeten rekordbox-Installation kopieren. Den Originalordner vorher sichern.
+5. rekordbox vollständig schließen und neu starten.
+6. Bridge starten:
 
 ```bat
 py cmd4a_ddjsx_windows.py --list
-py cmd4a_ddjsx_windows.py --input "CMD Studio 4A" --output "PIONEER DDJ-SX" --monitor
+py cmd4a_ddjsx_windows.py --input "Studio 4A" --output "PIONEER DDJ-SX" --monitor
 ```
 
-Oder `start_windows_pure.bat` starten. Die bisherige `rekordjog_cmd4a_ddjsx.py` bleibt als plattformübergreifende Variante mit `mido` erhalten; für Windows ohne native Python-Pakete ist die neue `cmd4a_ddjsx_windows.py` die richtige Datei.
+Alternativ:
 
-## Aktualisierte Mapping-Datei
+```text
+start_windows_pure.bat
+```
 
-`PIONEER DDJ-SX.midi.csv` enthält jetzt zusätzlich die dokumentierten DDJ-SX-Funktionen für Play/Pause, Cue, Sync, Hot Cue 1–8, Loop In, Loop Out und Load. Die Python-Übersetzer geben dieselben DDJ-SX-Status-/Notenwerte aus.
+## MIDI-Funktionen
 
-Die CSV-Zeilen sind die DDJ-SX-Zieldefinitionen. Die CMD-Eingangsbytes und die abgeleitete Verbindung stehen vollständig in `CMD4A_to_DDJ-SX_facts.csv`.
+Die Bridge verarbeitet die dokumentierten Eingangsdaten des CMD Studio 4A und sendet DDJ-SX-Zieldaten für:
 
-## Mixer- und EQ-Regler
-
-Die Übersetzer enthalten jetzt auch die dokumentierten CMD-CCs für:
-
-- Gain/Trim Deck A/B
-- EQ High Deck A/B
-- EQ Mid Deck A/B
-- EQ Low Deck A/B
-- Kanal-Fader Deck A/B
+- Jogwheel links/rechts und Jog-Touch
+- Pitchfader links/rechts
+- Play/Pause
+- Cue
+- Sync
+- Hot Cue 1–8
+- Loop In / Loop Out
+- Load
+- Gain/Trim
+- EQ High/Mid/Low
+- Kanal-Fader
 - Crossfader
 
-Die DDJ-SX-Ziele sind die offiziellen 14-Bit-CC-Paare aus der AlphaTheta/Pioneer-MIDI-Liste. Der CMD Studio 4A liefert diese Regler als 7-Bit-CC; der Übersetzer sendet deshalb den CMD-Wert als MSB und `0` als LSB. Diese konkrete 7→14-Bit-Konvertierung ist technisch erforderlich und als `fact-derived` dokumentiert; sie ist keine direkte 14-Bit-Ausgabe des CMD.
+Die offiziellen DDJ-SX-Zielcodes für Jogwheel, Touch, EQ und Fader stammen aus der AlphaTheta/Pioneer-MIDI-Liste. Die CMD-Eingangscodes stammen aus der dokumentierten CMD-Studio-4A-Controllerdefinition.
+
+## Diagnose
+
+Mit `--monitor` werden Eingang und Ausgang angezeigt:
+
+```text
+IN  B0 1A 41
+OUT (4268720,)
+```
+
+Die Dezimalzahl bei `OUT` ist ein gepackter Windows-MIDI-Wert. Die Eingangsbytes sind die wichtigen Diagnosewerte.
+
+Beispiele der CMD-Eingänge:
+
+```text
+Jog links:       B0 1A xx
+Jog rechts:      B1 3A xx
+EQ High links:   B0 60 xx
+EQ Mid links:    B0 61 xx
+EQ Low links:    B0 62 xx
+EQ High rechts:  B1 63 xx
+EQ Mid rechts:   B1 64 xx
+EQ Low rechts:   B1 65 xx
+Fader links:     B0 70 xx
+Fader rechts:    B1 71 xx
+```
+
+## Dateien
+
+| Datei | Zweck |
+|---|---|
+| `cmd4a_ddjsx_windows.py` | Hauptprogramm für Windows ohne C++/pip |
+| `start_windows_pure.bat` | Startdatei mit dem Gerätenamen `Studio 4A` |
+| `PIONEER DDJ-SX.midi.csv` | rekordbox-DDJ-SX-Mapping |
+| `CMD4A_to_DDJ-SX_facts.csv` | Dokumentation der Eingangs- und Zielcodes |
+
+## Quellen
+
+- [CMD Studio 4A MIDI-Definition](https://github.com/mixxxdj/mixxx/blob/main/res/controllers/Behringer%20CMDStudio4a.midi.xml)
+- [CMD Studio 4A Script](https://github.com/mixxxdj/mixxx/blob/main/res/controllers/Behringer-CMDStudio4a-scripts.js)
+- [AlphaTheta DDJ-SX MIDI-kompatible Software und MIDI-Liste](https://support.alphatheta.com/en-US/articles/23923285968537?product=4416570097177)
+- [RekordJog-Projekt](https://github.com/timkondratev/RekordJog)
+
+## Bekannte Grenze
+
+Die Bridge kann MIDI-Nachrichten senden, aber die Annahme der Nachrichten hängt von der verwendeten rekordbox-Version, dem aktiven `MidiMappings`-Ordner und dem virtuellen MIDI-Treiber ab. FX-Assign und FX-Regler sind nicht künstlich einer nicht dokumentierten DDJ-SX-Funktion zugeordnet.
