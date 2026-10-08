@@ -12,7 +12,7 @@ import queue
 import sys
 import time
 
-RELEASE = "2026.10.08-windows-pure"
+RELEASE = "2026.10.08-windows-pure-complete"
 
 winmm = ctypes.WinDLL("winmm.dll")
 MIDI_CALLBACK = ctypes.WINFUNCTYPE(None, wintypes.HANDLE, wintypes.UINT,
@@ -78,6 +78,14 @@ def translate(status, d1, d2):
     if typ == 0xB0 and (ch, d1) in analog:
         target_ch, msb, lsb = analog[(ch, d1)]
         return (pack(0xB0 | target_ch, msb, d2), pack(0xB0 | target_ch, lsb, 0))
+    # CMD FX knobs 2/3 -> official DDJ-SX FX1/FX2 parameter MSB+LSB pairs.
+    fx_knobs = {
+        (0, 0x11):(4, 0x02, 0x22), (0, 0x12):(4, 0x04, 0x24),
+        (1, 0x31):(5, 0x02, 0x22), (1, 0x32):(5, 0x04, 0x24),
+    }
+    if typ == 0xB0 and (ch, d1) in fx_knobs:
+        target_ch, msb, lsb = fx_knobs[(ch, d1)]
+        return (pack(0xB0 | target_ch, msb, d2), pack(0xB0 | target_ch, lsb, 0))
     # Official DDJ-SX list: platter jog is CC 0x22; limit to its documented
     # relative range (34..63 CCW, 65..89 CW).
     if typ == 0xB0 and ch in (0, 1) and d1 in (0x1A, 0x3A):
@@ -101,6 +109,12 @@ def translate(status, d1, d2):
         (0,0x28):0x12, (1,0x48):0x32, (0,0x29):0x20, (1,0x49):0x40,
         (0,0x50):0x0A, (1,0x51):0x2A,  # Load, DDJ-SX status 0x9E
     }
+    # FX assign 1/2: official DDJ-SX FX1/FX2 ON messages.
+    fx_buttons = {(0,0x52):(4,0x47), (0,0x53):(4,0x48),
+                  (1,0x54):(5,0x47), (1,0x55):(5,0x48)}
+    if typ in (0x80, 0x90) and (ch, d1) in fx_buttons:
+        target_ch, note = fx_buttons[(ch, d1)]
+        return pack(0x90 | target_ch, note, d2)
     if typ in (0x80, 0x90) and ch in (0, 1) and (ch, d1) in button:
         status = 0x9E if (ch, d1) in ((0, 0x50), (1, 0x51)) else 0x9F
         return pack(status, button[(ch, d1)], d2)

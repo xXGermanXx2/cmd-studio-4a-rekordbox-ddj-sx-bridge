@@ -2,6 +2,8 @@
 
 Windows-MIDI-Bridge für den Behringer CMD Studio 4A. Die Bridge übersetzt die MIDI-Daten des CMD Studio 4A in DDJ-SX-kompatible Nachrichten für rekordbox 7.
 
+Aktuelle Release: `2026.10.08-windows-pure-complete`
+
 ## Windows-Version ohne C++
 
 Verwendete Datei:
@@ -62,6 +64,8 @@ Die Bridge verarbeitet die dokumentierten Eingangsdaten des CMD Studio 4A und se
 - EQ High/Mid/Low
 - Kanal-Fader
 - Crossfader
+- FX-Parameter 1/2 links/rechts
+- FX-Assign 1/2 links/rechts
 
 Die offiziellen DDJ-SX-Zielcodes für Jogwheel, Touch, EQ und Fader stammen aus der AlphaTheta/Pioneer-MIDI-Liste. Die CMD-Eingangscodes stammen aus der dokumentierten CMD-Studio-4A-Controllerdefinition.
 
