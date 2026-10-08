@@ -17,3 +17,10 @@ CMD Loop In A,Note ch1 0x17,DDJ-SX LoopIn,Note ch16 0x0E,fact-derived,equal func
 CMD Loop In B,Note ch2 0x38,DDJ-SX LoopIn,Note ch16 0x2E,fact-derived,equal function name in CMD XML and DDJ-SX controller map
 CMD Loop Out A,Note ch1 0x18,DDJ-SX LoopOut,Note ch16 0x10,fact-derived,equal function name in CMD XML and DDJ-SX controller map
 CMD Loop Out B,Note ch2 0x37,DDJ-SX LoopOut,Note ch16 0x30,fact-derived,equal function name in CMD XML and DDJ-SX controller map
+CMD Gain A,CC ch1 0x10,DDJ-SX TRIM,CC ch1 0x04+0x24,fact-derived,CMD Mixxx XML + official AlphaTheta DDJ-SX MIDI list
+CMD Gain B,CC ch2 0x30,DDJ-SX TRIM,CC ch2 0x04+0x24,fact-derived,CMD Mixxx XML + official AlphaTheta DDJ-SX MIDI list
+CMD EQ High A/B,CC ch1 0x60 / ch2 0x63,DDJ-SX EQ HIGH,CC ch1/ch2 0x07+0x27,fact-derived,CMD Mixxx XML + official AlphaTheta DDJ-SX MIDI list
+CMD EQ Mid A/B,CC ch1 0x61 / ch2 0x64,DDJ-SX EQ MID,CC ch1/ch2 0x0B+0x2B,fact-derived,CMD Mixxx XML + official AlphaTheta DDJ-SX MIDI list
+CMD EQ Low A/B,CC ch1 0x62 / ch2 0x65,DDJ-SX EQ LOW,CC ch1/ch2 0x0F+0x2F,fact-derived,CMD Mixxx XML + official AlphaTheta DDJ-SX MIDI list
+CMD Channel Fader A/B,CC ch1 0x70 / ch2 0x71,DDJ-SX Channel Fader,CC ch1/ch2 0x1F+0x3F,fact-derived,CMD Mixxx XML + official AlphaTheta DDJ-SX MIDI list
+CMD Crossfader,CC ch1 0x72,DDJ-SX Crossfader,CC ch7 0x1F+0x3F,fact-derived,CMD Mixxx XML + official AlphaTheta DDJ-SX MIDI list

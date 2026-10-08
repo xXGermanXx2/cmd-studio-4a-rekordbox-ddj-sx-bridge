@@ -40,6 +40,15 @@ LOAD_OUTPUT_STATUS = 0x9E
 JOG_INPUT = {(0, 0x1A): 0, (1, 0x3A): 1}
 TOUCH_INPUT = {(0, 0x1A): 0, (1, 0x3A): 1}
 PITCH_CHANNELS = {0, 1}
+# CMD 7-bit controls -> DDJ-SX 14-bit target (status channel, MSB CC, LSB CC).
+ANALOG_MAP = {
+    (0, 0x10): (0, 0x04, 0x24), (1, 0x30): (1, 0x04, 0x24),  # TRIM
+    (0, 0x60): (0, 0x07, 0x27), (1, 0x63): (1, 0x07, 0x27),  # EQ HIGH
+    (0, 0x61): (0, 0x0B, 0x2B), (1, 0x64): (1, 0x0B, 0x2B),  # EQ MID
+    (0, 0x62): (0, 0x0F, 0x2F), (1, 0x65): (1, 0x0F, 0x2F),  # EQ LOW
+    (0, 0x70): (0, 0x1F, 0x3F), (1, 0x71): (1, 0x1F, 0x3F),  # channel fader
+    (0, 0x72): (6, 0x1F, 0x3F),                            # crossfader, DDJ ch7
+}
 
 
 def select_port(ports, hint, kind):
@@ -64,9 +73,18 @@ def send_pitch(out, msg):
     out.send(mido.Message('control_change', channel=msg.channel, control=0x20, value=lsb))
 
 
+def send_analog(out, msg, target):
+    channel, msb_cc, lsb_cc = target
+    out.send(mido.Message('control_change', channel=channel, control=msb_cc, value=msg.value))
+    out.send(mido.Message('control_change', channel=channel, control=lsb_cc, value=0))
+
+
 def translate(msg, out, passthrough=False, monitor=False):
     key = (getattr(msg, 'channel', -1), getattr(msg, 'note', -1))
-    if msg.type == 'control_change' and (msg.channel, msg.control) in JOG_INPUT:
+    if msg.type == 'control_change' and (msg.channel, msg.control) in ANALOG_MAP:
+        send_analog(out, msg, ANALOG_MAP[(msg.channel, msg.control)])
+        result = f"ANALOG CC {msg.control:#04x} -> DDJ-SX 14-bit CC"
+    elif msg.type == 'control_change' and (msg.channel, msg.control) in JOG_INPUT:
         deck = JOG_INPUT[(msg.channel, msg.control)]
         send_jog(out, deck, msg.value)
         result = f"JOG Deck {deck+1}: CC {msg.control:#04x} -> DDJ-SX CC 0x0A"

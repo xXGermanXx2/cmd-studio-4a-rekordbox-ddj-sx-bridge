@@ -23,3 +23,9 @@ PAD8_HotCue,PAD8_HotCue,DdjSxPad,9F20,1,2,,,,,,,,,Fast,
 LoopIn,LoopIn,Button,9F0E,1,2,,,,,,,,,Fast,
 LoopOut,LoopOut,Button,9F10,1,2,,,,,,,,,Fast,
 Load,Load,Button,9E0A,1,2,,,,,,,,,,
+TRIM,TRIM,KnobSlider,B004,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B024
+EQ_HIGH,EQ_HIGH,KnobSlider,B007,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B027
+EQ_MID,EQ_MID,KnobSlider,B00B,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B02B
+EQ_LOW,EQ_LOW,KnobSlider,B00F,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B02F
+CHANNEL_FADER,CHANNEL_FADER,KnobSlider,B01F,1,2,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B03F
+CROSSFADER,CROSSFADER,KnobSlider,B61F,7,,,,,,,,,,,DDJ-SX 14-bit MSB; LSB B63F

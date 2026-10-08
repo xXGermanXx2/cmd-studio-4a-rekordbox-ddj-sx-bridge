@@ -156,3 +156,16 @@ Oder `start_windows_pure.bat` starten. Die bisherige `rekordjog_cmd4a_ddjsx.py` 
 `PIONEER DDJ-SX.midi.csv` enthält jetzt zusätzlich die dokumentierten DDJ-SX-Funktionen für Play/Pause, Cue, Sync, Hot Cue 1–8, Loop In, Loop Out und Load. Die Python-Übersetzer geben dieselben DDJ-SX-Status-/Notenwerte aus.
 
 Die CSV-Zeilen sind die DDJ-SX-Zieldefinitionen. Die CMD-Eingangsbytes und die abgeleitete Verbindung stehen vollständig in `CMD4A_to_DDJ-SX_facts.csv`.
+
+## Mixer- und EQ-Regler
+
+Die Übersetzer enthalten jetzt auch die dokumentierten CMD-CCs für:
+
+- Gain/Trim Deck A/B
+- EQ High Deck A/B
+- EQ Mid Deck A/B
+- EQ Low Deck A/B
+- Kanal-Fader Deck A/B
+- Crossfader
+
+Die DDJ-SX-Ziele sind die offiziellen 14-Bit-CC-Paare aus der AlphaTheta/Pioneer-MIDI-Liste. Der CMD Studio 4A liefert diese Regler als 7-Bit-CC; der Übersetzer sendet deshalb den CMD-Wert als MSB und `0` als LSB. Diese konkrete 7→14-Bit-Konvertierung ist technisch erforderlich und als `fact-derived` dokumentiert; sie ist keine direkte 14-Bit-Ausgabe des CMD.
