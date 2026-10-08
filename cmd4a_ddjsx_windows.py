@@ -54,7 +54,12 @@ def out_ports():
 
 
 def select(items, hint, label):
-    matches = [(i, n) for i, n in items if hint.lower() in n.lower()]
+    # Prefer an exact port name. This is required when the safe LED port is
+    # named "PIONEER DDJ-SX LED", which also contains the control-port name.
+    exact = [(i, n) for i, n in items if n.casefold() == hint.casefold()]
+    if len(exact) == 1:
+        return exact[0][0]
+    matches = [(i, n) for i, n in items if hint.casefold() in n.casefold()]
     if len(matches) != 1:
         raise RuntimeError(f"Eindeutiger {label}-Port nicht gefunden für '{hint}': {matches}")
     return matches[0][0]
@@ -155,11 +160,74 @@ def translate(status, d1, d2):
     return None
 
 
+def translate_led(status, d1, d2):
+    """Translate DDJ-SX feedback from rekordbox to CMD Studio 4A LEDs."""
+    typ, ch = status & 0xF0, status & 0x0F
+    notes = {
+        # Play, Cue, Sync, AutoLoop, Phones/PFL, and loop-size buttons.
+        (0, 0x0B): (0, 0x2C), (1, 0x0B): (1, 0x4C),
+        (0, 0x0C): (0, 0x2B), (1, 0x0C): (1, 0x4B),
+        (0, 0x58): (0, 0x2D), (1, 0x58): (1, 0x4D),
+        (0, 0x14): (0, 0x19), (1, 0x14): (1, 0x39),
+        (0, 0x54): (0, 0x6A), (1, 0x54): (1, 0x6B),
+        (0, 0x12): (0, 0x17), (1, 0x12): (1, 0x38),
+        (0, 0x13): (0, 0x18), (1, 0x13): (1, 0x37),
+        # FX unit buttons.
+        (4, 0x47): (0, 0x10), (4, 0x48): (0, 0x11),
+        (4, 0x49): (0, 0x12), (5, 0x47): (1, 0x30),
+        (5, 0x48): (1, 0x31), (5, 0x49): (1, 0x32),
+    }
+    if typ in (0x80, 0x90) and (ch, d1) in notes:
+        target_ch, note = notes[(ch, d1)]
+        # CMD Studio 4A LED feedback uses 00=off, 01=solid, 02=blinking.
+        return pack(0x90 | target_ch, note, 0x01 if d2 else 0x00)
+    # DDJ-SX load/FX-assign feedback is on channel 7 (0x96).
+    special = {
+        (6, 0x46): (0, 0x50), (6, 0x47): (1, 0x51),
+        (6, 0x4C): (0, 0x52), (6, 0x4D): (0, 0x53),
+        (6, 0x50): (1, 0x54), (6, 0x51): (1, 0x55),
+    }
+    if typ in (0x80, 0x90) and (ch, d1) in special:
+        target_ch, note = special[(ch, d1)]
+        return pack(0x90 | target_ch, note, 0x01 if d2 else 0x00)
+    return None
+
+
+def local_led_feedback(status, d1, d2, led_state):
+    """Create a direct Studio 4A LED message without using rekordbox MIDI-OUT."""
+    typ, ch = status & 0xF0, status & 0x0F
+    if typ not in (0x80, 0x90) or d2 == 0:
+        return None
+    key = (ch, d1)
+    # Play/Pause, Cue and Sync are requested as permanently illuminated indicators.
+    permanent = {
+        (0, 0x2C): 0x2C, (1, 0x4C): 0x4C,
+        (0, 0x2B): 0x2B, (1, 0x4B): 0x4B,
+        (0, 0x2D): 0x2D, (1, 0x4D): 0x4D,
+    }
+    if key in permanent:
+        return pack(0x90 | ch, permanent[key], 0x01)
+    # These controls are locally toggled because rekordbox MIDI-OUT is
+    # intentionally disabled to prevent a LoopMIDI feedback loop.
+    toggles = {
+        (0, 0x19): 0x19, (1, 0x39): 0x39,  # AutoLoop
+        (0, 0x6A): 0x6A, (1, 0x6B): 0x6B,  # Phones/PFL
+        (0, 0x10): 0x10, (0, 0x11): 0x11, (0, 0x12): 0x12,
+        (1, 0x30): 0x30, (1, 0x31): 0x31, (1, 0x32): 0x32,
+    }
+    if key in toggles:
+        led_state[key] = not led_state.get(key, False)
+        return pack(0x90 | ch, toggles[key], 0x01 if led_state[key] else 0x00)
+    return None
+
+
 def main():
     ap = argparse.ArgumentParser(description="CMD Studio 4A DDJ-SX-Bridge ohne C++/pip")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--input", default="CMD Studio 4A")
     ap.add_argument("--output", default="PIONEER DDJ-SX")
+    ap.add_argument("--feedback-input", default="",
+                    help="Separater MIDI-Eingang für rekordbox-MIDI-OUT/LED-Feedback")
     ap.add_argument("--monitor", action="store_true")
     args = ap.parse_args()
     ins, outs = in_ports(), out_ports()
@@ -167,38 +235,76 @@ def main():
         print("MIDI-Eingänge:"); print("\n".join(f"{i}: {n}" for i,n in ins))
         print("MIDI-Ausgänge:"); print("\n".join(f"{i}: {n}" for i,n in outs)); return 0
     try:
-        in_id, out_id = select(ins, args.input, "Eingangs"), select(outs, args.output, "Ausgangs")
+        in_id = select(ins, args.input, "Eingangs")
+        out_id = select(outs, args.output, "Ausgangs")
+        feedback_in_id = (select(ins, args.feedback_input, "LED-Feedback-Eingangs")
+                          if args.feedback_input else None)
+        led_out_id = select(outs, args.input, "LED-Ausgangs")
         events = queue.Queue()
-        @MIDI_CALLBACK
-        def callback(handle, message, instance, param1, param2):
-            if message == MIM_DATA:
-                events.put(param1 & 0xFFFFFF)
+        def make_callback(source):
+            @MIDI_CALLBACK
+            def callback(handle, message, instance, param1, param2):
+                if message == MIM_DATA:
+                    events.put((source, param1 & 0xFFFFFF))
+            return callback
+        control_callback = make_callback("control")
+        feedback_callback = make_callback("feedback")
         in_handle = wintypes.HANDLE(); out_handle = wintypes.HANDLE()
+        feedback_handle = wintypes.HANDLE(); led_handle = wintypes.HANDLE()
         r = winmm.midiOutOpen(ctypes.byref(out_handle), out_id, 0, 0, 0)
         if r != MMSYSERR_NOERROR: raise RuntimeError(f"midiOutOpen Fehler {r}")
-        r = winmm.midiInOpen(ctypes.byref(in_handle), in_id, ctypes.cast(callback, ctypes.c_void_p), 0, CALLBACK_FUNCTION)
+        r = winmm.midiOutOpen(ctypes.byref(led_handle), led_out_id, 0, 0, 0)
+        if r != MMSYSERR_NOERROR: raise RuntimeError(f"LED-Ausgang öffnen Fehler {r}")
+        r = winmm.midiInOpen(ctypes.byref(in_handle), in_id, ctypes.cast(control_callback, ctypes.c_void_p), 0, CALLBACK_FUNCTION)
         if r != MMSYSERR_NOERROR: raise RuntimeError(f"midiInOpen Fehler {r}")
+        if feedback_in_id is not None:
+            r = winmm.midiInOpen(ctypes.byref(feedback_handle), feedback_in_id, ctypes.cast(feedback_callback, ctypes.c_void_p), 0, CALLBACK_FUNCTION)
+            if r != MMSYSERR_NOERROR: raise RuntimeError(f"LED-Feedback öffnen Fehler {r}")
         winmm.midiInStart(in_handle)
-        print(f"Eingang: {ins[in_id][1]}\nAusgang: {outs[out_id][1]}\nStrg+C beendet.")
+        if feedback_in_id is not None:
+            winmm.midiInStart(feedback_handle)
+        # Play/Pause, Cue and Sync are intentionally always illuminated.
+        # CMD Studio 4A: 00=off, 01=solid, 02=blinking.
+        for packet in (pack(0x90, 0x2C, 0x01), pack(0x91, 0x4C, 0x01),
+                       pack(0x90, 0x2B, 0x01), pack(0x91, 0x4B, 0x01),
+                       pack(0x90, 0x2D, 0x01), pack(0x91, 0x4D, 0x01)):
+            winmm.midiOutShortMsg(led_handle, packet)
+        led_state = {}
+        feedback_line = (f"LED-Feedback: {ins[feedback_in_id][1]} -> {outs[led_out_id][1]}"
+                         if feedback_in_id is not None else
+                         "LED-Feedback: lokale Simulation")
+        print(f"Eingang: {ins[in_id][1]}\nAusgang: {outs[out_id][1]}\n"
+              f"{feedback_line}\nStrg+C beendet.")
         try:
             while True:
                 try:
-                    raw = events.get(timeout=0.1)
+                    source, raw = events.get(timeout=0.1)
                 except queue.Empty:
                     # Normalzustand: Der Controller sendet nicht permanent.
                     continue
                 status, d1, d2 = raw & 255, (raw >> 8) & 127, (raw >> 16) & 127
                 if args.monitor:
                     print(f"IN  {status:02X} {d1:02X} {d2:02X}", flush=True)
-                result = translate(status, d1, d2)
+                if source == "feedback":
+                    result = translate_led(status, d1, d2)
+                    destination = led_handle
+                else:
+                    local_led = local_led_feedback(status, d1, d2, led_state)
+                    if local_led is not None:
+                        winmm.midiOutShortMsg(led_handle, local_led)
+                    result = translate(status, d1, d2)
+                    destination = out_handle
                 if result is None: continue
                 packets = result if isinstance(result, tuple) else (result,)
-                for packet in packets: winmm.midiOutShortMsg(out_handle, packet)
+                for packet in packets: winmm.midiOutShortMsg(destination, packet)
                 if args.monitor: print(f"OUT {packets}", flush=True)
         except KeyboardInterrupt:
             pass
         finally:
-            winmm.midiInStop(in_handle); winmm.midiInClose(in_handle); winmm.midiOutClose(out_handle)
+            winmm.midiInStop(in_handle); winmm.midiInClose(in_handle)
+            if feedback_in_id is not None:
+                winmm.midiInStop(feedback_handle); winmm.midiInClose(feedback_handle)
+            winmm.midiOutClose(out_handle); winmm.midiOutClose(led_handle)
     except Exception as exc:
         print(f"Fehler: {exc}", file=sys.stderr); return 2
     return 0
