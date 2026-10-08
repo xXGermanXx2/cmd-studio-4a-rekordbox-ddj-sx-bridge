@@ -76,7 +76,6 @@ ChannelFader,ChannelFader,KnobSliderHiRes,B013,0,1,2,3,,,,,,,CH Fader
 ChannelFaderStartPlay,ChannelFaderStartPlay,Button,9066,0,1,2,3,,,,,,RO,CH Fader Start (PLAY)
 #ChannelFaderStartSync,ChannelFaderStartSync,Button,9051,0,1,2,3,,,,,,RO,CH Fader Start (SYNC)
 ChannelFaderStartCue,ChannelFaderStartCue,Button,9052,0,1,2,3,,,,,,RO,CH Fader Start (CUE)
-Gain,Gain,KnobSliderHiRes,B004,0,1,2,3,,,,,,Fast,Gain
 EQHigh,EQHigh,KnobSliderHiRes,B007,0,1,2,3,,,,,,Fast,EQ High
 EQMid,EQMid,KnobSliderHiRes,B00B,0,1,2,3,,,,,,Fast,EQ Mid
 EQLow,EQLow,KnobSliderHiRes,B00F,0,1,2,3,,,,,,Fast,EQ Low

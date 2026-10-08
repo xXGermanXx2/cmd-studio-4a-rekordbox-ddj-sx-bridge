@@ -69,8 +69,11 @@ def pack(status, d1=0, d2=0):
     return (status & 0xFF) | ((d1 & 0x7F) << 8) | ((d2 & 0x7F) << 16)
 
 
-def translate(status, d1, d2):
+def translate(status, d1, d2, filter_state=None):
     typ, ch = status & 0xF0, status & 0x0F
+    if filter_state is None:
+        filter_state = {"value": {0: 0x40, 1: 0x40},
+                        "active": {0: True, 1: True}}
     # Hard priority: the documented CMD jog messages are handled before any
     # button map. They must never be interpreted as Cue or another button.
     if (status, d1) in ((0xB0, 0x1A), (0xB1, 0x3A)):
@@ -83,7 +86,6 @@ def translate(status, d1, d2):
         return pack(0x90 | ch, 0x36, 0x00)
     # CMD 7-bit mixer controls -> official DDJ-SX 14-bit CC pairs.
     analog = {
-        (0, 0x10):(0,0x04,0x24), (1,0x30):(1,0x04,0x24),
         (0, 0x60):(0,0x07,0x27), (1,0x63):(1,0x07,0x27),
         (0, 0x61):(0,0x0B,0x2B), (1,0x64):(1,0x0B,0x2B),
         (0, 0x62):(0,0x0F,0x2F), (1,0x65):(1,0x0F,0x2F),
@@ -94,15 +96,22 @@ def translate(status, d1, d2):
         target_ch, msb, lsb = analog[(ch, d1)]
         return (pack(0xB0 | target_ch, msb, d2),
                 pack(0xB0 | target_ch, lsb, 0))
-    # CMD FX knobs 2/3 -> official DDJ-SX FX1/FX2 parameter MSB+LSB pairs.
+    # CMD FX1/FX2/FX3 knobs -> DDJ-SX FX1 parameter 1/2/3.
+    # Gain is deliberately not translated; B0 10/B1 30 are FX1 knobs here.
     fx_knobs = {
-        (0, 0x11):(4, 0x02, 0x22), (0, 0x12):(4, 0x04, 0x24),
-        (1, 0x31):(5, 0x02, 0x22), (1, 0x32):(5, 0x04, 0x24),
+        (0, 0x10):(4, 0x02, 0x22), (0, 0x11):(4, 0x04, 0x24),
+        (0, 0x12):(4, 0x06, 0x26),
+        (1, 0x30):(5, 0x02, 0x22), (1, 0x31):(5, 0x04, 0x24),
+        (1, 0x32):(5, 0x06, 0x26),
         # FX4 -> DDJ-SX Color FX/filter parameter, left/right channel.
         (0, 0x13):(6, 0x17, 0x37), (1, 0x33):(6, 0x18, 0x38),
     }
     if typ == 0xB0 and (ch, d1) in fx_knobs:
         target_ch, msb, lsb = fx_knobs[(ch, d1)]
+        if (ch, d1) in ((0, 0x13), (1, 0x33)):
+            filter_state["value"][ch] = d2
+            if not filter_state["active"][ch]:
+                d2 = 0x40
         return (pack(0xB0 | target_ch, msb, d2),
                 pack(0xB0 | target_ch, lsb, 0))
     # CMD browser controls -> official DDJ-SX browser messages.
@@ -138,7 +147,7 @@ def translate(status, d1, d2):
     if typ in (0x80, 0x90) and (ch, d1) in hotcue:
         target_ch, note = hotcue[(ch, d1)]
         return pack(0x90 | target_ch, note, d2)
-    # FX assign 1/2: official DDJ-SX FX1/FX2 ON messages.
+    # FX1/FX2/FX3 buttons -> their matching DDJ-SX FX parameter ON messages.
     fx_buttons = {(0,0x10):(4,0x47), (0,0x11):(4,0x48),
                   (0,0x12):(4,0x49), (1,0x30):(5,0x47),
                   (1,0x31):(5,0x48), (1,0x32):(5,0x49),
@@ -147,10 +156,15 @@ def translate(status, d1, d2):
     if typ in (0x80, 0x90) and (ch, d1) in fx_buttons:
         target_ch, note = fx_buttons[(ch, d1)]
         return pack(0x90 | target_ch, note, d2)
-    # DDJ-SX has no factual Filter On/Off message; its documented CFX button
-    # centers/resets the filter parameter. Use that exact function for FX4.
+    # FX4 button toggles the CFX filter. The DDJ-SX has no separate factual
+    # CFX on/off message: neutral center is the documented filter-off state.
     if typ in (0x80, 0x90) and (ch, d1) in ((0, 0x13), (1, 0x33)):
-        return pack(0x96, 0x74 if ch == 0 else 0x75, d2)
+        if d2 == 0:
+            return None
+        filter_state["active"][ch] = not filter_state["active"][ch]
+        value = filter_state["value"][ch] if filter_state["active"][ch] else 0x40
+        msb, lsb = (0x17, 0x37) if ch == 0 else (0x18, 0x38)
+        return (pack(0xB6, msb, value), pack(0xB6, lsb, 0))
     if typ in (0x80, 0x90) and ch in (0, 1) and (ch, d1) in button:
         if (ch, d1) == (0, 0x50):
             return pack(0x96, 0x46, d2)
@@ -213,7 +227,9 @@ def local_led_feedback(status, d1, d2, led_state):
         (0, 0x19): 0x19, (1, 0x39): 0x39,  # AutoLoop
         (0, 0x6A): 0x6A, (1, 0x6B): 0x6B,  # Phones/PFL
         (0, 0x10): 0x10, (0, 0x11): 0x11, (0, 0x12): 0x12,
+        (0, 0x13): 0x13,
         (1, 0x30): 0x30, (1, 0x31): 0x31, (1, 0x32): 0x32,
+        (1, 0x33): 0x33,
     }
     if key in toggles:
         led_state[key] = not led_state.get(key, False)
@@ -270,6 +286,8 @@ def main():
                        pack(0x90, 0x2D, 0x01), pack(0x91, 0x4D, 0x01)):
             winmm.midiOutShortMsg(led_handle, packet)
         led_state = {}
+        filter_state = {"value": {0: 0x40, 1: 0x40},
+                        "active": {0: True, 1: True}}
         feedback_line = (f"LED-Feedback: {ins[feedback_in_id][1]} -> {outs[led_out_id][1]}"
                          if feedback_in_id is not None else
                          "LED-Feedback: lokale Simulation")
@@ -292,7 +310,7 @@ def main():
                     local_led = local_led_feedback(status, d1, d2, led_state)
                     if local_led is not None:
                         winmm.midiOutShortMsg(led_handle, local_led)
-                    result = translate(status, d1, d2)
+                    result = translate(status, d1, d2, filter_state)
                     destination = out_handle
                 if result is None: continue
                 packets = result if isinstance(result, tuple) else (result,)

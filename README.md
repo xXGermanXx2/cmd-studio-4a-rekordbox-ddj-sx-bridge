@@ -13,6 +13,8 @@ Windows-MIDI-Bridge für den Behringer CMD Studio 4A. Die Bridge übersetzt die 
 - Play/Pause, Cue, Sync, Hot Cues und Load
 - Browser, FX und AutoLoop
 - Lokale LED-Steuerung ohne MIDI-OUT-Feedback-Schleife
+- FX1, FX2 und FX3 mit jeweils eigenem Parameter und An/Aus-Taste
+- FX4 als High-/Low-Pass-Filter mit eigenem An/Aus-Schalter
 
 ## Voraussetzungen
 
@@ -109,13 +111,25 @@ Die Bridge verarbeitet dokumentierte CMD-Studio-4A-Eingangsdaten und sendet DDJ-
 - Hot Cue 1–8
 - Loop-Größe und AutoLoop
 - Load
-- Gain/Trim
 - EQ High/Mid/Low
 - Kanal-Fader
 - Crossfader
 - FX-Parameter links/rechts
 - FX-Assign links/rechts
 - Browser-Regler, Enter sowie Zurück/Weiter
+
+Gain/Trim ist absichtlich vollständig entfernt. Die vier FX-Bedienelemente
+werden so übersetzt:
+
+| CMD-Bedienelement | Funktion |
+|---|---|
+| FX1-Regler und FX1-Taste | DDJ-SX FX1-Parameter 1 und An/Aus |
+| FX2-Regler und FX2-Taste | DDJ-SX FX1-Parameter 2 und An/Aus |
+| FX3-Regler und FX3-Taste | DDJ-SX FX1-Parameter 3 und An/Aus |
+| FX4-Regler und FX4-Taste | High-/Low-Pass-Filter und Filter An/Aus |
+
+Beim FX4-Filter bedeutet Aus den neutralen Mittelpunkt. Beim erneuten
+Einschalten wird die zuletzt eingestellte Filterposition wiederhergestellt.
 
 Die DDJ-SX-Zielcodes für Jogwheel, Touch, EQ und Fader stammen aus der DDJ-SX-MIDI-Definition. Die CMD-Eingangscodes stammen aus der dokumentierten CMD-Studio-4A-Controllerdefinition.
 
